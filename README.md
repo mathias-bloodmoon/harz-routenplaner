@@ -6,17 +6,20 @@ No login, no tracking.
 
 - Live (planned): https://routing.pixelcenter.de
 - Specification: [CONCEPT.md](CONCEPT.md) · Rules for agents: [CLAUDE.md](CLAUDE.md) · Changes: [CHANGELOG.md](CHANGELOG.md)
-- Status: milestones M0–M1 (map, DE/EN, stamp points, waypoints). See the milestones in CONCEPT.md §7.
+- Status: milestones M0–M1 done, M2 in progress (routing api + BRouter ready, UI follows). See CONCEPT.md §7.
 
 ## Run locally with Docker (recommended)
 
-Requirements: Docker with Compose v2.
+Requirements: Docker with Compose v2, ~1 GB free RAM, ~300 MB disk for the routing data.
 
 ```sh
 git clone https://github.com/mathias-bloodmoon/harz-routenplaner.git
 cd harz-routenplaner
+scripts/brouter/download-segments.sh          # once: OSM routing data for the Harz → data/segments/
 docker compose -f infra/docker-compose.yml up --build
 ```
+
+Details (services, BRouter profiles, smoke test): [infra/README.md](infra/README.md).
 
 Open http://localhost. **Success looks like:** a topographic map of the Harz with the hiking trail overlay, the
 attribution "© OpenStreetMap … OpenTopoMap … Waymarked Trails" at the bottom right, and a side panel on the left
@@ -55,10 +58,10 @@ E2E tests build the web app and run it with `vite preview`. To test a running st
 
 ```
 apps/web/      frontend: Vite + TypeScript, Leaflet; texts in src/i18n/de.json and en.json
-apps/api/      backend: Fastify (GET /api/health; routing follows in M2)
-scripts/       stamp data converter (scripts/stamps), see data/README.md
+apps/api/      backend: Fastify – GET /api/health, POST /api/route (BRouter proxy)
+scripts/       stamp data converter (scripts/stamps), BRouter segments/fixtures/smoke test (scripts/brouter)
 data/          generated stamps.geojson (not committed), README
-infra/         docker-compose.yml (local stack); production setup follows in M5
+infra/         docker-compose.yml (local stack), brouter/ (image + profiles), README; production setup in M5
 .github/       CI: lint, typecheck, unit tests, build, Docker Compose stack + Playwright E2E
 ```
 
@@ -77,6 +80,11 @@ Configuration is done with environment variables, see [.env.example](.env.exampl
 - Limits: 2–25 waypoints; only inside the planning area (Harz + ~40 km: lat 51.13–52.31, lon 9.64–12.20,
   `apps/web/src/plan/area.ts`). Outside → message, nothing is added.
 - Stamp layer: clustered at low zoom, popup with number, name, booklets and link; filter by booklet; layer toggle.
+- Routing api (M2): `POST /api/route` with `{"waypoints":[{"lat":…,"lng":…},…]}`. 2 waypoints → BRouter
+  alternatives 0–2 (profile `harz-trails`); 3+ waypoints → one route each with `harz-shortest` ("Kürzeste"),
+  `harz-trails` ("Wanderwege"), `harz-gentle` ("Sanft"). Routes overlapping > 90 % with an earlier one (both ways,
+  25 m tolerance) are dropped. Errors: `too-few-waypoints`, `too-many-waypoints`, `outside-area` (400),
+  `no-route` (422), `rate-limited` (429), `routing-unavailable` (503).
 - Pure, unit-tested logic: `apps/web/src/plan/` (waypoints, area check, stored state), `apps/web/src/stamps/data.ts`
   (parsing, booklet filter), `scripts/stamps/` (converter).
 

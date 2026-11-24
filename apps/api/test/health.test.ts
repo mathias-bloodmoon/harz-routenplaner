@@ -1,8 +1,11 @@
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildApp } from "../src/app.js";
 
 describe("GET /api/health", () => {
-  const app = buildApp({ logLevel: "silent" });
+  let app: Awaited<ReturnType<typeof buildApp>>;
+  beforeAll(async () => {
+    app = await buildApp({ config: { logLevel: "silent" } });
+  });
   afterAll(() => app.close());
 
   it("returns status ok", async () => {

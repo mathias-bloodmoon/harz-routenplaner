@@ -6,6 +6,11 @@ All notable changes to this project. Format based on [Keep a Changelog](https://
 
 ### Added
 
+- M2a routing backend: BRouter 1.7.10 container with three generated Harz hiking profiles (shortest,
+  trail-friendly, gentle) and segment download script; `POST /api/route` with validation, 2 waypoints → engine
+  alternatives, 3+ → one route per profile, de-duplication (> 90 % overlap), per-IP rate limit, in-memory cache,
+  no request logs. CI runs the real BRouter (cached segments) with a smoke test of the sample tours.
+
 - M1b stamp layer: clusters, popups (number, name, booklets, link), booklet filter, layer toggle; runtime flag
   `STAMPS_ENABLED` via `/config.json` (web image default `false`); `data/` mounted read-only into the web container.
 - M1b waypoints: add by map click or from a stamp popup, drag, reorder (keyboard), delete, reverse, clear; 2–25

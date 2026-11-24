@@ -8,3 +8,4 @@ apps/web/screenshots/
 # Harzer Wandernadel data: free for private use only, not published until permission (CONCEPT.md §3)
 data/raw/
 data/stamps.geojson
+data/segments/
