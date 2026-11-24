@@ -5,3 +5,4 @@ playwright-report
 test-results
 CONCEPT.md
 CLAUDE.md
+apps/web/src/export/test/gpx-1.1.xsd

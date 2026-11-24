@@ -33,5 +33,8 @@ for (const language of ["de", "en"] as const) {
     const chart = await page.locator("#elevation-chart .u-over").boundingBox();
     if (chart) await page.mouse.move(chart.x + chart.width * 0.6, chart.y + chart.height / 2);
     await page.screenshot({ path: `screenshots/${testInfo.project.name}-${language}-details.png` });
+    await page.mouse.move(0, 0);
+    await page.locator("#export-open").click();
+    await page.screenshot({ path: `screenshots/${testInfo.project.name}-${language}-export.png` });
   });
 }
