@@ -47,5 +47,6 @@
   "booklet.burgen-schloesser": "Burgen und Schlösser (castles)",
   "booklet.klosterwanderweg": "Klosterwanderweg (Monastery Trail)",
   "booklet.sonderstempel": "Special stamps",
-  "attribution.stamps": "Stamp points"
+  "attribution.stamps": "Stamp points",
+  "stamps.countOne": "1 point"
 }

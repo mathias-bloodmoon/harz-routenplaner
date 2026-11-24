@@ -40,7 +40,13 @@ export function createStampPanel(onChange: (visible: boolean, booklets: Set<Book
           { className: "check" },
           input,
           h("span", {}, t(language, `booklet.${booklet}` as const)),
-          h("span", { className: "count" }, t(language, "stamps.count", { count: counts.get(booklet) ?? 0 })),
+          h(
+            "span",
+            { className: "count" },
+            counts.get(booklet) === 1
+              ? t(language, "stamps.countOne")
+              : t(language, "stamps.count", { count: counts.get(booklet) ?? 0 }),
+          ),
         );
       }),
     );
