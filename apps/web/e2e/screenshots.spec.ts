@@ -28,5 +28,10 @@ for (const language of ["de", "en"] as const) {
     await page.locator(".route-card").first().waitFor();
     await page.waitForLoadState("networkidle");
     await page.screenshot({ path: `screenshots/${testInfo.project.name}-${language}.png` });
+    // second shot: details with elevation chart, cursor in the middle of the chart (marker on the map)
+    await page.locator("#details").scrollIntoViewIfNeeded();
+    const chart = await page.locator("#elevation-chart .u-over").boundingBox();
+    if (chart) await page.mouse.move(chart.x + chart.width * 0.6, chart.y + chart.height / 2);
+    await page.screenshot({ path: `screenshots/${testInfo.project.name}-${language}-details.png` });
   });
 }

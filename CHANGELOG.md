@@ -6,6 +6,10 @@ All notable changes to this project. Format based on [Keep a Changelog](https://
 
 ### Added
 
+- M3 route details: DIN 33466 walking time (main) and distance ÷ speed (secondary), length, ascent/descent with
+  5 m hysteresis (also used on the cards), lowest/highest point, uPlot elevation chart with stamp points,
+  chart ↔ map hover sync, stamp points within 100 m of the route, speed input (stored with the plan).
+
 - M2b routing UI: "Routen berechnen" (enabled from 2 waypoints) with loading state, alternatives as coloured
   lines and cards (name, km, ↑ ↓), selection by card or line (others fade), "only N distinct routes" message,
   signage note, clear messages for every api error; routes are dropped when the waypoints change.

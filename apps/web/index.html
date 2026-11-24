@@ -47,6 +47,19 @@
               <button type="button" class="button" id="wp-reverse" data-i18n="waypoints.reverse"></button>
               <button type="button" class="button" id="wp-clear" data-i18n="waypoints.clear"></button>
             </div>
+            <div class="field">
+              <label for="speed" data-i18n="speed.label"></label>
+              <input
+                type="number"
+                id="speed"
+                inputmode="decimal"
+                min="1"
+                max="10"
+                step="0.5"
+                aria-describedby="speed-hint"
+              />
+              <p id="speed-hint" class="hint small" data-i18n="speed.hint"></p>
+            </div>
             <button
               type="button"
               class="button primary wide"
@@ -58,6 +71,14 @@
             <h2 id="routes-title" tabindex="-1" data-i18n="routes.title"></h2>
             <p id="routes-note" class="hint" hidden></p>
             <ul id="route-cards" class="route-cards"></ul>
+            <div id="details" class="details" aria-labelledby="details-title">
+              <h3 id="details-title" data-i18n="details.title"></h3>
+              <dl id="route-stats" class="stats"></dl>
+              <p class="hint small" data-i18n="details.timeHint"></p>
+              <div id="elevation-chart" class="chart" role="img"></div>
+              <h3 data-i18n="details.stampsTitle"></h3>
+              <ul id="route-stamps" class="route-stamps"></ul>
+            </div>
             <p class="hint signage" data-i18n="routes.signage"></p>
           </section>
           <section class="section" id="stamps-section" aria-labelledby="stamps-title" hidden>
