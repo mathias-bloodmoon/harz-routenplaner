@@ -1,0 +1,17 @@
+{
+  "name": "scripts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "stamps:fetch-special": "tsx stamps/fetch-special.ts",
+    "stamps:build": "tsx stamps/build.ts"
+  },
+  "dependencies": {
+    "fast-xml-parser": "5.12.1",
+    "fflate": "0.8.3"
+  },
+  "devDependencies": {
+    "tsx": "4.23.15"
+  }
+}

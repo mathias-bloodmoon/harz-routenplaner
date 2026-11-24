@@ -52,6 +52,8 @@ E2E tests build the web app and run it with `vite preview`. To test a running st
 ```
 apps/web/      frontend: Vite + TypeScript, Leaflet; texts in src/i18n/de.json and en.json
 apps/api/      backend: Fastify (GET /api/health; routing follows in M2)
+scripts/       stamp data converter (scripts/stamps), see data/README.md
+data/          generated stamps.geojson (not committed), README
 infra/         docker-compose.yml (local stack); production setup follows in M5
 .github/       CI: lint, typecheck, unit tests, build, Docker Compose stack + Playwright E2E
 ```
