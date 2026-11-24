@@ -4,4 +4,4 @@ dist/
 playwright-report/
 test-results/
 *.log
-screenshots/
+apps/web/screenshots/
