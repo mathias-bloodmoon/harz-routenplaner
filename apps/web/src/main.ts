@@ -12,18 +12,33 @@ import {
   reorderWaypoint,
   reverseWaypoints,
   MAX_WAYPOINTS,
+  MIN_WAYPOINTS,
   type Result,
   type Waypoint,
 } from "./plan/waypoints";
+import { requestRoutes } from "./routing/api";
+import type { Route, RouteErrorCode } from "./routing/types";
 import { loadRuntimeConfig } from "./runtimeConfig";
 import { filterByBooklets, loadStamps } from "./stamps/data";
 import type { Stamp } from "./stamps/types";
 import { loadItem, saveItem } from "./storage";
 import { byId } from "./ui/dom";
+import { createRouteLayer } from "./ui/routeLayer";
+import { createRoutePanel, routeName } from "./ui/routePanel";
 import { createStampLayer, type StampLayer } from "./ui/stampLayer";
 import { createStampPanel } from "./ui/stampPanel";
 import { createWaypointLayer } from "./ui/waypointLayer";
 import { createWaypointPanel } from "./ui/waypointPanel";
+
+const ERROR_KEYS: Record<RouteErrorCode, MessageKey> = {
+  "invalid-request": "error.invalidRequest",
+  "too-few-waypoints": "error.tooFew",
+  "too-many-waypoints": "error.tooMany",
+  "outside-area": "error.outsideArea",
+  "routing-unavailable": "error.routingUnavailable",
+  "no-route": "error.noRoute",
+  "rate-limited": "error.rateLimited",
+};
 
 const LANGUAGE_KEY = "language";
 const PLAN_KEY = "plan";
@@ -95,14 +110,91 @@ async function start(): Promise<void> {
     },
   });
 
+  // ---- routes (not stored: they are recalculated on demand) ----
+  let routes: Route[] | null = null;
+  let selectedRouteId: string | null = null;
+  let pending: AbortController | null = null;
+  const panelElement = byId("panel");
+  const routeLayer = createRouteLayer(
+    harzMap.map,
+    (id) => selectRoute(id),
+    // bottom-sheet layout (phones): the panel overlaps the map
+    () => (window.matchMedia("(max-width: 700px)").matches ? panelElement.offsetHeight : 0),
+  );
+  const routePanel = createRoutePanel(
+    () => void calculate(),
+    (id) => selectRoute(id),
+  );
+
+  function renderRoutes(fit = false): void {
+    routePanel.render(routes, selectedRouteId, language);
+    if (routes) routeLayer.show(routes, selectedRouteId, fit);
+    else routeLayer.clear();
+  }
+
+  function selectRoute(id: string): void {
+    const route = routes?.find((r) => r.id === id);
+    if (!route) return;
+    selectedRouteId = id;
+    renderRoutes();
+    showStatus("routes.selected", { name: routeName(route, language) });
+  }
+
+  /** Waypoints changed: previous routes no longer match. */
+  function invalidateRoutes(): void {
+    pending?.abort();
+    pending = null;
+    routePanel.setBusy(false, language);
+    if (!routes) return;
+    routes = null;
+    selectedRouteId = null;
+    renderRoutes();
+  }
+
+  async function calculate(): Promise<void> {
+    if (plan.waypoints.length < MIN_WAYPOINTS) {
+      showStatus("error.tooFew", { min: MIN_WAYPOINTS }, true);
+      return;
+    }
+    pending?.abort();
+    const controller = new AbortController();
+    pending = controller;
+    routePanel.setBusy(true, language);
+    try {
+      const response = await requestRoutes(plan.waypoints, controller.signal);
+      if (pending !== controller) return;
+      if (!response.ok) {
+        showStatus(
+          ERROR_KEYS[response.error],
+          { max: MAX_WAYPOINTS, min: MIN_WAYPOINTS, seconds: response.retryAfterSeconds ?? 60 },
+          true,
+        );
+        return;
+      }
+      routes = response.result.routes;
+      selectedRouteId = routes[0]!.id;
+      renderRoutes(true);
+      showStatus("routes.found", { count: routes.length });
+    } catch {
+      // aborted because the waypoints changed
+    } finally {
+      if (pending === controller) {
+        pending = null;
+        routePanel.setBusy(false, language);
+      }
+    }
+  }
+
   function render(): void {
     waypointLayer.render(plan.waypoints, language);
     waypointPanel.render(plan.waypoints, language);
+    routePanel.setCanCalculate(plan.waypoints.length >= MIN_WAYPOINTS);
   }
 
   function update(waypoints: Waypoint[]): void {
     plan = { ...plan, waypoints };
     saveItem(PLAN_KEY, serializePlan(plan));
+    invalidateRoutes();
     render();
   }
 
@@ -166,6 +258,8 @@ async function start(): Promise<void> {
     stampLayer?.setLanguage(language);
     stampPanel.render(language);
     render();
+    routePanel.setBusy(pending !== null, language);
+    renderRoutes();
     if (lastStatus) showStatus(lastStatus.key, lastStatus.params, lastStatus.error);
   });
 
