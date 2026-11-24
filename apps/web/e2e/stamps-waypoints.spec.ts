@@ -14,16 +14,6 @@ test("shows stamp points with popup, booklet filter and layer toggle", async ({ 
   await expect(stampMarkers(page)).toHaveCount(5);
   await expect(page.locator(".leaflet-control-attribution")).toContainText("Harzer Wandernadel");
 
-  await page.getByRole("button", { name: "Stempelstelle 2: Teststempel Nordost & Hütte" }).click();
-  const popup = page.locator(".leaflet-popup");
-  await expect(popup).toContainText("Teststempel Nordost & Hütte");
-  await expect(popup).toContainText("Harzer Wandernadel (222 Stempel)");
-  await expect(popup.getByRole("link", { name: "Mehr auf harzer-wandernadel.de" })).toHaveAttribute(
-    "href",
-    "https://www.harzer-wandernadel.de/",
-  );
-  await page.keyboard.press("Escape");
-
   const filter = page.getByRole("group", { name: "Stempelhefte" });
   await expect(filter.getByRole("checkbox")).toHaveCount(3);
   await filter.getByRole("checkbox", { name: /Harzer Wandernadel/ }).uncheck();
@@ -35,7 +25,21 @@ test("shows stamp points with popup, booklet filter and layer toggle", async ({ 
   await page.getByRole("checkbox", { name: "Stempelstellen der Harzer Wandernadel anzeigen" }).uncheck();
   await expect(stampMarkers(page)).toHaveCount(0);
   await expect(page.locator(".leaflet-control-attribution")).not.toContainText("Harzer Wandernadel");
-  await expect(filter).toBeDisabled();
+  await expect(filter.getByRole("checkbox").first()).toBeDisabled();
+
+  // popup (last: opening a popup can pan the map)
+  await page.getByRole("checkbox", { name: "Stempelstellen der Harzer Wandernadel anzeigen" }).check();
+  await filter.getByRole("checkbox", { name: /Harzer Wandernadel/ }).check();
+  await expect(stampMarkers(page)).toHaveCount(4);
+  await page.getByRole("button", { name: "Stempelstelle 2: Teststempel Nordost & Hütte" }).click();
+  const popup = page.locator(".leaflet-popup");
+  await expect(popup).toContainText("Teststempel Nordost & Hütte");
+  await expect(popup).toContainText("Harzer Wandernadel (222 Stempel)");
+  await expect(popup.getByRole("link", { name: "Mehr auf harzer-wandernadel.de" })).toHaveAttribute(
+    "href",
+    "https://www.harzer-wandernadel.de/",
+  );
+  await page.keyboard.press("Escape");
 });
 
 test("adds, reorders, drags and deletes waypoints; the plan survives a reload", async ({ page }) => {
@@ -61,7 +65,7 @@ test("adds, reorders, drags and deletes waypoints; the plan survives a reload", 
   await page.keyboard.press("Enter");
   await page.keyboard.press("Enter");
   await expect(waypointItems(page).nth(0)).toContainText("Teststempel Nordwest");
-  await expect(waypointItems(page).nth(1)).toContainText(firstName.replace(/^A: /, ""));
+  await expect(waypointItems(page).nth(1).locator(".wp-name")).toHaveText(firstName);
 
   // drag the second marker; it gets new coordinates
   const before = await waypointItems(page).nth(1).locator(".wp-name").innerText();
