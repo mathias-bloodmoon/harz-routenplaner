@@ -6,7 +6,7 @@ No login, no tracking.
 
 - Live (planned): https://routing.pixelcenter.de
 - Specification: [CONCEPT.md](CONCEPT.md) · Rules for agents: [CLAUDE.md](CLAUDE.md) · Changes: [CHANGELOG.md](CHANGELOG.md)
-- Status: milestones M0–M2 (map, DE/EN, stamp points, waypoints, routing with 2–3 alternatives). See CONCEPT.md §7.
+- Status: milestones M0–M3 (map, DE/EN, stamp points, waypoints, routing, elevation profile and walking time). See CONCEPT.md §7.
 
 ## Run locally with Docker (recommended)
 
@@ -87,7 +87,16 @@ Configuration is done with environment variables, see [.env.example](.env.exampl
   25 m tolerance) are dropped; the UI then says "Nur 2 unterschiedliche Routen gefunden". Errors:
   `too-few-waypoints`, `too-many-waypoints`, `outside-area` (400), `no-route` (422), `rate-limited` (429),
   `routing-unavailable` (503).
-- Pure, unit-tested logic: `apps/web/src/plan/` (waypoints, area check, stored state), `apps/web/src/stamps/data.ts`
+- Details (M3) of the selected route: walking time after **DIN 33466** (main value) and distance ÷ speed
+  (secondary), length, ascent/descent, lowest/highest point, elevation chart (uPlot) with stamp points, stamp
+  points within 100 m listed with their position. Hovering the chart shows the point on the map and vice versa
+  (mouse). Speed input (km/h, default 4.0, 1–10) is stored with the plan.
+  - Ascent/descent are computed in the browser from the route's elevations with a **5 m hysteresis**
+    (`details/elevation.ts`): changes count only once the elevation moved 5 m from the last turning point; the
+    remainder to the end is added, so ascent − descent = net change. Cards and details use the same values.
+  - DIN 33466 (`details/walkingTime.ts`): horizontal = distance ÷ speed; vertical = ascent ÷ 300 m/h + descent ÷
+    500 m/h; total = larger + half of the smaller. Example: 12 km, 600 m up and down, 4 km/h → 4 h 42 min.
+- Pure, unit-tested logic: `apps/web/src/details/` (walking time, elevation, stamps along the route), `apps/web/src/plan/` (waypoints, area check, stored state), `apps/web/src/stamps/data.ts`
   (parsing, booklet filter), `scripts/stamps/` (converter).
 
 ## Technical decisions

@@ -16,13 +16,19 @@ import {
   type Result,
   type Waypoint,
 } from "./plan/waypoints";
+import L from "leaflet";
+import { stampsAlongRoute } from "./details/along";
+import { elevationProfile, type ElevationProfile } from "./details/elevation";
 import { requestRoutes } from "./routing/api";
+import { routeColor } from "./routing/colors";
 import type { Route, RouteErrorCode } from "./routing/types";
 import { loadRuntimeConfig } from "./runtimeConfig";
 import { filterByBooklets, loadStamps } from "./stamps/data";
 import type { Stamp } from "./stamps/types";
 import { loadItem, saveItem } from "./storage";
 import { byId } from "./ui/dom";
+import { createDetailsPanel } from "./ui/detailsPanel";
+import { createElevationChart } from "./ui/elevationChart";
 import { createRouteLayer } from "./ui/routeLayer";
 import { createRoutePanel, routeName } from "./ui/routePanel";
 import { createStampLayer, type StampLayer } from "./ui/stampLayer";
@@ -114,6 +120,8 @@ async function start(): Promise<void> {
   let routes: Route[] | null = null;
   let selectedRouteId: string | null = null;
   let pending: AbortController | null = null;
+  let allStamps: Stamp[] = [];
+  const profiles = new Map<string, ElevationProfile>();
   const panelElement = byId("panel");
   const routeLayer = createRouteLayer(
     harzMap.map,
@@ -126,11 +134,102 @@ async function start(): Promise<void> {
     (id) => selectRoute(id),
   );
 
+  // ---- details: stats, walking time, elevation chart, stamps along the route ----
+  const hoverMarker = L.circleMarker([0, 0], {
+    className: "hover-marker",
+    radius: 7,
+    color: "#ffffff",
+    weight: 3,
+    fillColor: "#1c2320",
+    fillOpacity: 1,
+    interactive: false,
+  });
+  const chart = createElevationChart(byId("elevation-chart"), (index) => showHover(index));
+  const detailsPanel = createDetailsPanel((s) => {
+    harzMap.map.setView([s.stamp.lat, s.stamp.lng], Math.max(harzMap.map.getZoom(), 14));
+    const profile = selectedRouteId ? profiles.get(selectedRouteId) : undefined;
+    if (profile) {
+      const index = profile.distances.findIndex((d) => d >= s.atM);
+      showHover(index < 0 ? null : index);
+      chart.highlight(index < 0 ? null : index);
+    }
+  });
+
+  function selectedRoute(): Route | undefined {
+    return routes?.find((r) => r.id === selectedRouteId);
+  }
+
+  function showHover(index: number | null): void {
+    const position = index === null ? undefined : selectedRoute()?.coordinates[index];
+    if (!position) {
+      hoverMarker.remove();
+      return;
+    }
+    hoverMarker.setLatLng([position[1], position[0]]);
+    if (!harzMap.map.hasLayer(hoverMarker)) hoverMarker.addTo(harzMap.map);
+  }
+
+  function renderDetails(chartToo = true): void {
+    const route = selectedRoute();
+    const profile = route ? profiles.get(route.id) : undefined;
+    if (!route || !profile || !routes) {
+      chart.clear();
+      hoverMarker.remove();
+      return;
+    }
+    const stamps = stampsAlongRoute(allStamps, route.coordinates, profile.distances);
+    detailsPanel.render(profile, stamps, plan.speedKmh, language);
+    if (chartToo) chart.show(profile, stamps, routeColor(routes.indexOf(route)), language);
+  }
+
   function renderRoutes(fit = false): void {
     routePanel.render(routes, selectedRouteId, language);
     if (routes) routeLayer.show(routes, selectedRouteId, fit);
     else routeLayer.clear();
+    renderDetails();
   }
+
+  // Map → chart: hovering near the selected route moves the chart cursor (mouse only; the map is exempt on touch).
+  let hoverFrame = 0;
+  harzMap.map.on("mousemove", (event) => {
+    cancelAnimationFrame(hoverFrame);
+    hoverFrame = requestAnimationFrame(() => {
+      const route = selectedRoute();
+      if (!route) return;
+      const mouse = event.containerPoint;
+      let best = -1;
+      let bestDistance = 30; // px
+      route.coordinates.forEach(([lng, lat], i) => {
+        const d = harzMap.map.latLngToContainerPoint([lat, lng]).distanceTo(mouse);
+        if (d < bestDistance) {
+          bestDistance = d;
+          best = i;
+        }
+      });
+      const index = best < 0 ? null : best;
+      showHover(index);
+      chart.highlight(index);
+    });
+  });
+  harzMap.map.on("mouseout", () => {
+    showHover(null);
+    chart.highlight(null);
+  });
+
+  // ---- speed ----
+  const speedInput = byId<HTMLInputElement>("speed");
+  speedInput.value = String(plan.speedKmh);
+  speedInput.addEventListener("input", () => {
+    const value = Number(speedInput.value.replace(",", "."));
+    if (!Number.isFinite(value) || value < 1 || value > 10) {
+      speedInput.setAttribute("aria-invalid", "true");
+      return;
+    }
+    speedInput.removeAttribute("aria-invalid");
+    plan = { ...plan, speedKmh: value };
+    saveItem(PLAN_KEY, serializePlan(plan));
+    renderDetails(false);
+  });
 
   function selectRoute(id: string): void {
     const route = routes?.find((r) => r.id === id);
@@ -171,7 +270,18 @@ async function start(): Promise<void> {
         );
         return;
       }
-      routes = response.result.routes;
+      // own elevation smoothing (details/elevation.ts) for cards and details alike
+      profiles.clear();
+      routes = response.result.routes.map((route) => {
+        const profile = elevationProfile(route.coordinates);
+        profiles.set(route.id, profile);
+        return {
+          ...route,
+          distanceM: profile.distanceM,
+          ascentM: profile.ascentM,
+          descentM: profile.descentM,
+        };
+      });
       selectedRouteId = routes[0]!.id;
       renderRoutes(true);
       showStatus("routes.found", { count: routes.length });
@@ -247,8 +357,6 @@ async function start(): Promise<void> {
     harzMap.setStampAttribution(visible);
     stampLayer?.setStamps(filterByBooklets(allStamps, booklets));
   });
-  let allStamps: Stamp[] = [];
-
   byId("lang-toggle").addEventListener("click", () => {
     language = language === "de" ? "en" : "de";
     saveItem(LANGUAGE_KEY, language);
@@ -267,6 +375,7 @@ async function start(): Promise<void> {
   if (!config.stampsEnabled) return;
   try {
     allStamps = await loadStamps();
+    renderDetails(); // routes may already be on screen
   } catch {
     stampPanel.showError();
     return;

@@ -29,7 +29,7 @@ export const test = base.extend({
 export { expect } from "@playwright/test";
 
 export interface RouteFixture {
-  routes: { id: string; kind: string }[];
+  routes: { id: string; kind: string; coordinates: [number, number, number][] }[];
   requested: number;
 }
 

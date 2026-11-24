@@ -540,3 +540,98 @@ button {
 .route-line {
   cursor: pointer;
 }
+
+/* ---------- route details (M3) ---------- */
+.field {
+  margin-top: 14px;
+}
+
+.field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.field input {
+  width: 7em;
+  min-height: 44px;
+  padding: 0 10px;
+  font: inherit;
+  border: 1px solid var(--muted);
+  border-radius: 8px;
+}
+
+.field input[aria-invalid="true"] {
+  border-color: #b3261e;
+  outline-color: #b3261e;
+}
+
+.hint.small {
+  font-size: 0.85rem;
+  margin: 4px 0 0;
+}
+
+.details h3 {
+  font-size: 1rem;
+  margin: 16px 0 8px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin: 0;
+}
+
+.stat dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.stat dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat.main {
+  grid-column: 1 / -1;
+}
+
+.stat.main dd {
+  font-size: 1.5rem;
+  color: var(--green-dark);
+}
+
+.stat.secondary {
+  grid-column: 1 / -1;
+}
+
+.chart {
+  margin-top: 10px;
+  min-height: 170px;
+  overflow: hidden;
+}
+
+.route-stamps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.route-stamps li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.link-button {
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #1d4f91;
+  text-align: left;
+  text-decoration: underline;
+}
