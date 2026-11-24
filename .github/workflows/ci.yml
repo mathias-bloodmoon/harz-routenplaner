@@ -61,7 +61,7 @@ jobs:
         run: |
           curl --fail --silent http://localhost/ | grep -q "<title>Harz Routenplaner</title>"
           curl --fail --silent http://localhost/api/health | grep -q '"status":"ok"'
-          curl --fail --silent http://localhost/config.json | grep -q '"stampsEnabled": true'
+          curl --fail --silent http://localhost/config.json | grep -q '"stampsEnabled":true'
           curl --fail --silent http://localhost/data/stamps.geojson | grep -q FeatureCollection
       - name: Routing integration (real BRouter, sample tours)
         run: scripts/brouter/smoke-test.sh http://localhost
@@ -82,7 +82,7 @@ jobs:
       - name: Production default hides the stamp layer (STAMPS_ENABLED unset → false in the image)
         run: |
           docker compose -f infra/docker-compose.yml up --detach --wait --no-build harz-web
-          curl --silent http://localhost/config.json | grep -q '"stampsEnabled": false'
+          curl --silent http://localhost/config.json | grep -q '"stampsEnabled":false'
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://localhost/data/stamps.geojson)" = 404
         env:
           STAMPS_ENABLED: "false"
