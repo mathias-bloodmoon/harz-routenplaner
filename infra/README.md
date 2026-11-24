@@ -1,7 +1,7 @@
 # Infrastructure
 
-Everything needed to run the Harz Routenplaner with Docker. Production deployment (Hetzner `nsc-demo`, Caddy,
-GitHub Actions) follows with milestone M5.
+Everything needed to run the Harz Routenplaner with Docker: the local stack (`docker-compose.yml`) and production
+on Hetzner `nsc-demo` (`docker-compose.prod.yml`, `routing.caddy`, GitHub Actions) – see "Production" below.
 
 ## Services (`infra/docker-compose.yml`)
 
@@ -73,4 +73,96 @@ changes, with the stack running:
 ```sh
 BROUTER_URL=http://localhost:17777 scripts/brouter/record-fixtures.sh
 pnpm --filter api exec tsx test/write-e2e-fixtures.ts
+```
+
+## Production (https://routing.pixelcenter.de)
+
+The app runs on Hetzner `nsc-demo` (CAX11, Arm64, 4 GB) **next to the NSC portal demo**. Hard rules: never touch
+`/opt/nsc-portal` or the NSC containers, publish no ports, stack ≤ 1 GB, validate the Caddy file before every reload.
+
+```
+Internet ─443─▶ Caddy (NSC stack, container nsc-portal-caddy-1)
+                  └─ /etc/caddy/sites/routing.caddy  (= /opt/caddy-sites/routing.caddy)
+                       └─ reverse_proxy harz-routenplaner-web:8080   (Docker network "edge")
+                            harz-web ─▶ harz-api ─▶ brouter        (internal network of this stack)
+```
+
+### Files on the server (`/opt/harz-routenplaner`, owner `nsc`)
+
+| File                  | Source                                                       | Note                                                                                                                                            |
+| --------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docker-compose.yml`  | `infra/docker-compose.prod.yml`                              | copied by every deploy                                                                                                                          |
+| `routing.caddy`       | `infra/routing.caddy`                                        | copied to `/opt/caddy-sites/routing.caddy` after validation                                                                                     |
+| `.env`                | created once from `infra/env.production.example`             | **edited on the server**, never overwritten (except `HARZ_TAG`, `HARZ_TAG_PREVIOUS` and – if the repository variable is set – `STAMPS_ENABLED`) |
+| `data/segments/*.rd5` | `download-segments.sh`                                       | downloaded on the first deploy (~300 MB)                                                                                                        |
+| `data/stamps.geojson` | built once by the deploy workflow when the stamp layer is on | never in git or an image                                                                                                                        |
+
+### Deploy (automatic)
+
+Every push to `main` runs `.github/workflows/deploy.yml`:
+
+1. **preflight** (`preflight.yml`, read-only): `/opt/caddy-sites`, network `edge`, Caddy imports the sites folder,
+   folders writable, `docker compose --wait`, curl; prints memory/disk and whether Caddy writes access logs.
+2. **images**: `harz-web`, `harz-api`, `harz-brouter` for `linux/amd64` + `linux/arm64` →
+   `ghcr.io/mathias-bloodmoon/<name>:<commit sha>` and `:latest`.
+3. **deploy** over SSH as `nsc`: copies the files above, runs `remote-deploy.sh <sha> <caddy container>`: sets
+   `HARZ_TAG`, downloads segments if missing, `docker compose pull` (with a ghcr token valid for this run only),
+   `up -d --wait`, then **`caddy validate`** with the new `routing.caddy` – on error the old file is restored and Caddy
+   is **not** reloaded – then `caddy reload`, then `docker stats`.
+4. **smoke**: HTTPS, `/api/health`, legal pages, `scripts/brouter/smoke-test.sh https://routing.pixelcenter.de`,
+   Playwright `@production` (map, real route, GPX download).
+
+Secrets (Settings → Secrets and variables → Actions): `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`,
+`DEPLOY_KNOWN_HOSTS`, `CADDY_CONTAINER`. Repository **variable** `STAMPS_ENABLED` (`true`/`false`) switches the stamp
+layer on the next deploy. Server preparation (once): `docs/harz-m5-server.md` in the FlashBot repo, summarised:
+user `nsc` in group `docker`, `/opt/harz-routenplaner` and an empty `/opt/caddy-sites/routing.caddy` owned by `nsc`.
+
+Manual run: GitHub → Actions → "Build and deploy" → Run workflow.
+
+### Change settings (Impressum address, stamp layer)
+
+```sh
+ssh nsc@nsc-demo
+cd /opt/harz-routenplaner
+nano .env                      # e.g. OPERATOR_ADDRESS=Musterweg 1|37120 Bovenden
+docker compose up -d           # recreates only the changed containers
+```
+
+**Success looks like:** `curl -s https://routing.pixelcenter.de/config.json` shows the new values.
+
+### Update the routing data (weekly OSM extract)
+
+```sh
+cd /opt/harz-routenplaner && sh download-segments.sh data/segments && docker compose restart brouter
+```
+
+### Rollback
+
+Every deploy records the previous image tag in `.env` as `HARZ_TAG_PREVIOUS`.
+
+```sh
+cd /opt/harz-routenplaner
+grep HARZ_TAG .env                                   # current and previous tag
+sed -i "s/^HARZ_TAG=.*/HARZ_TAG=<previous sha>/" .env
+docker compose up -d --wait
+```
+
+Old images stay on the server until `docker image prune`. If an image is no longer there, pull it after
+`docker login ghcr.io` (GitHub token with `read:packages`), or re-run the deploy workflow for that commit.
+
+### Caddy: validate and reload by hand
+
+```sh
+docker exec nsc-portal-caddy-1 caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+docker exec nsc-portal-caddy-1 caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
+```
+
+Only reload after a successful validate – a broken file takes the NSC demo offline. To take the planner offline
+without touching anything else: `: > /opt/caddy-sites/routing.caddy`, validate, reload, `docker compose down`.
+
+### Check
+
+```sh
+docker compose ps                                    # all healthy
+docker stats --no-stream $(docker compose ps -q)     # together < 1 GB
 ```

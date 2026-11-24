@@ -1,5 +1,7 @@
 # Build context: repository root (see infra/docker-compose.yml)
-FROM node:22-alpine AS base
+# Build stages run on the build machine's platform (fast multi-arch builds): the output is plain JavaScript and the
+# production dependencies are pure JavaScript, so they work on every target platform.
+FROM --platform=$BUILDPLATFORM node:22-alpine AS base
 RUN corepack enable
 WORKDIR /app
 

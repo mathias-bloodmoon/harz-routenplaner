@@ -13,7 +13,16 @@ function runtimeData(): Plugin {
     const enabled = process.env.STAMPS_ENABLED !== "false";
     if (req.url === "/config.json") {
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ stampsEnabled: enabled }));
+      res.end(
+        JSON.stringify({
+          stampsEnabled: enabled,
+          operator: {
+            name: process.env.OPERATOR_NAME ?? "",
+            address: process.env.OPERATOR_ADDRESS ?? "",
+            email: process.env.OPERATOR_EMAIL ?? "",
+          },
+        }),
+      );
       return;
     }
     if (req.url === "/data/stamps.geojson") {
@@ -46,5 +55,13 @@ export default defineConfig({
   },
   build: {
     target: "es2022",
+    rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL("index.html", import.meta.url)),
+        impressum: fileURLToPath(new URL("impressum.html", import.meta.url)),
+        datenschutz: fileURLToPath(new URL("datenschutz.html", import.meta.url)),
+        datenquellen: fileURLToPath(new URL("datenquellen.html", import.meta.url)),
+      },
+    },
   },
 });

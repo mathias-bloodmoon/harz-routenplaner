@@ -41,6 +41,8 @@ jobs:
           check "Docker network 'edge' exists"              "docker network inspect edge"
           check "Caddy container '$CADDY' running"          "docker inspect -f '{{.State.Running}}' $CADDY | grep -q true"
           check "Caddyfile imports /etc/caddy/sites/*.caddy" "docker exec $CADDY grep -q 'import /etc/caddy/sites/\*.caddy' /etc/caddy/Caddyfile"
+          check "docker compose with --wait (v2.17+)"       "docker compose up --help | grep -q -- --wait"
+          check "curl available (segment download)"       "command -v curl"
           check "sites folder mounted into Caddy"           "docker inspect -f '{{range .Mounts}}{{.Destination}} {{end}}' $CADDY | grep -q /etc/caddy/sites"
           echo "--- Caddy access logging (privacy text): lines with a 'log' directive"
           docker exec $CADDY sh -c 'cat /etc/caddy/Caddyfile /etc/caddy/sites/*.caddy 2>/dev/null' | grep -n -E '^[[:space:]]*log([[:space:]]|$|\{)' || echo "none"

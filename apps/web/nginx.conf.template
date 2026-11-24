@@ -23,11 +23,11 @@ server {
         return 200 "ok\n";
     }
 
-    # Runtime configuration for the frontend
+    # Runtime configuration for the frontend, written at start by /docker-entrypoint.d/40-runtime-config.sh
     location = /config.json {
         default_type application/json;
         expires -1;
-        return 200 '{"stampsEnabled": $stamps_enabled}';
+        alias /tmp/runtime/config.json;
     }
 
     # Stamp data is mounted at /srv/data (not baked into the public image, see data/README.md)
@@ -53,7 +53,8 @@ server {
         try_files $uri =404;
     }
 
+    # /impressum, /datenschutz, /datenquellen → the static pages
     location / {
-        try_files $uri /index.html;
+        try_files $uri $uri.html /index.html;
     }
 }

@@ -1,0 +1,51 @@
+# Production stack on Hetzner nsc-demo (/opt/harz-routenplaner/docker-compose.yml), see infra/README.md.
+# Rules (CLAUDE.md): no published ports, joins the NSC stack's network "edge" only with harz-web, stack ≤ 1 GB.
+# Settings come from /opt/harz-routenplaner/.env (created from infra/env.production.example, never overwritten).
+name: harz-routenplaner
+
+services:
+  harz-web:
+    image: ghcr.io/mathias-bloodmoon/harz-web:${HARZ_TAG:-latest}
+    environment:
+      STAMPS_ENABLED: ${STAMPS_ENABLED:-false}
+      OPERATOR_NAME: ${OPERATOR_NAME:-Mathias Nagel}
+      OPERATOR_ADDRESS: ${OPERATOR_ADDRESS:-}
+      OPERATOR_EMAIL: ${OPERATOR_EMAIL:-}
+    volumes:
+      - ./data:/srv/data:ro
+    networks:
+      default: {}
+      edge:
+        # Caddy (NSC stack) proxies routing.pixelcenter.de to this name (infra/routing.caddy)
+        aliases: [harz-routenplaner-web]
+    depends_on:
+      harz-api:
+        condition: service_healthy
+    restart: unless-stopped
+    mem_limit: 64m
+
+  harz-api:
+    image: ghcr.io/mathias-bloodmoon/harz-api:${HARZ_TAG:-latest}
+    environment:
+      API_PORT: "3000"
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+      BROUTER_URL: http://brouter:17777
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-20}
+      # Caddy (NSC stack) + nginx (harz-web) in front of the api
+      TRUST_PROXY_HOPS: "2"
+    depends_on:
+      brouter:
+        condition: service_healthy
+    restart: unless-stopped
+    mem_limit: 256m
+
+  brouter:
+    image: ghcr.io/mathias-bloodmoon/harz-brouter:${HARZ_TAG:-latest}
+    volumes:
+      - ./data/segments:/segments:ro
+    restart: unless-stopped
+    mem_limit: 512m
+
+networks:
+  edge:
+    external: true

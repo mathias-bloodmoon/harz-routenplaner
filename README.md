@@ -4,9 +4,9 @@ Free hiking route planner for the Harz: set waypoints on the map, compare 2–3 
 profile and walking time, see the Harzer Wandernadel stamp points, and export the route as GPX for Komoot.
 No login, no tracking.
 
-- Live (planned): https://routing.pixelcenter.de
+- Live: https://routing.pixelcenter.de
 - Specification: [CONCEPT.md](CONCEPT.md) · Rules for agents: [CLAUDE.md](CLAUDE.md) · Changes: [CHANGELOG.md](CHANGELOG.md)
-- Status: milestones M0–M4 (map, DE/EN, stamp points, waypoints, routing, elevation profile, walking time, GPX export). Next: M5 go-live. See CONCEPT.md §7.
+- Status: v1 complete (milestones M0–M5, CONCEPT.md §7). Operation and deployment: [infra/README.md](infra/README.md).
 
 ## Run locally with Docker (recommended)
 
@@ -68,11 +68,12 @@ infra/         docker-compose.yml (local stack), brouter/ (image + profiles), RE
 
 Configuration is done with environment variables, see [.env.example](.env.example).
 
-| Variable          | Default                                                  | Effect                                                                                                                                                           |
-| ----------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `STAMPS_ENABLED`  | `true` locally (compose, Vite), `false` in the web image | Stamp layer on/off. Served to the browser as `/config.json`; when `false`, `/data/stamps.geojson` returns 404. Production: only `true` after written permission. |
-| `STAMPS_DATA_DIR` | `../data`                                                | Folder with `stamps.geojson`, mounted read-only into the web container                                                                                           |
-| `WEB_PORT`        | `80`                                                     | Local port of the stack                                                                                                                                          |
+| Variable                                              | Default                                                  | Effect                                                                                                                                                           |
+| ----------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `STAMPS_ENABLED`                                      | `true` locally (compose, Vite), `false` in the web image | Stamp layer on/off. Served to the browser as `/config.json`; when `false`, `/data/stamps.geojson` returns 404. Production: only `true` after written permission. |
+| `STAMPS_DATA_DIR`                                     | `../data`                                                | Folder with `stamps.geojson`, mounted read-only into the web container                                                                                           |
+| `OPERATOR_NAME`, `OPERATOR_ADDRESS`, `OPERATOR_EMAIL` | empty                                                    | Impressum and privacy page (address lines separated by `\|`), served via `/config.json`; set on the server only                                                  |
+| `WEB_PORT`                                            | `80`                                                     | Local port of the stack                                                                                                                                          |
 
 ## How the planner works (M1)
 
