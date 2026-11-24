@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { test as base } from "@playwright/test";
 
 // 1×1 transparent PNG: tile requests are stubbed so tests do not load the public tile servers (fair use).
@@ -26,3 +27,15 @@ export const test = base.extend({
 });
 
 export { expect } from "@playwright/test";
+
+export interface RouteFixture {
+  routes: { id: string; kind: string }[];
+  requested: number;
+}
+
+/** Recorded api answers (see infra/README.md "Test fixtures"). */
+export function routeFixture(name: "route-2wp" | "route-3wp"): RouteFixture {
+  return JSON.parse(
+    readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8"),
+  ) as RouteFixture;
+}

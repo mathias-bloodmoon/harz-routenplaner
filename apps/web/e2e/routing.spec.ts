@@ -1,7 +1,8 @@
 import type { Page, Route as PlaywrightRoute } from "@playwright/test";
-import twoWaypoints from "./fixtures/route-2wp.json";
-import threeWaypoints from "./fixtures/route-3wp.json";
-import { expect, test } from "./fixtures";
+import { expect, routeFixture, test } from "./fixtures";
+
+const twoWaypoints = routeFixture("route-2wp");
+const threeWaypoints = routeFixture("route-3wp");
 
 // The UI tests use recorded api answers (deterministic). The real api + BRouter are tested in CI by
 // the "Routing integration" step and in apps/api/test.

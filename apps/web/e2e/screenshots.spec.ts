@@ -1,5 +1,6 @@
-import twoWaypoints from "./fixtures/route-2wp.json";
-import { test } from "./fixtures";
+import { routeFixture, test } from "./fixtures";
+
+const twoWaypoints = routeFixture("route-2wp");
 
 // Produces the PR screenshots (1280 px and 390 px). Run with SCREENSHOTS=1 and E2E_REAL_TILES=1.
 test.skip(!process.env.SCREENSHOTS, "screenshots only on demand");
