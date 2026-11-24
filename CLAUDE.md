@@ -45,7 +45,8 @@ The app runs on Hetzner `nsc-demo` (CAX11, Arm64, 4 GB RAM) next to the NSC port
 ## Way of working
 
 - Work milestone by milestone (M0 → M5 in CONCEPT.md §7). One branch per milestone (`m1-stamps-waypoints`, …),
-  one PR per milestone. **No direct pushes to `main`.** Mathias reviews and merges.
+  one PR per milestone. **No direct pushes to `main`.** The agent merges its own PRs once CI is green and the
+  definition of done is met (Mathias' instruction, 2026-11-24), then reports the merge to Mathias.
 - Keep PRs reviewable: if a milestone grows beyond ~1,500 changed lines, split it into sub-PRs.
 - Ask Mathias (Telegram) before changing scope, stack, licences or anything on the server outside this app.
 

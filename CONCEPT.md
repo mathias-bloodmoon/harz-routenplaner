@@ -144,7 +144,7 @@ harz-routenplaner/
 
 ## 7. Milestones
 
-Each milestone = one branch + one PR, reviewed by Mathias.
+Each milestone = one branch + one PR, merged by the build agent once CI is green and the definition of done is met.
 
 | # | Milestone | Done when |
 | --- | --- | --- |
