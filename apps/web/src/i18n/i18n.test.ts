@@ -40,3 +40,19 @@ describe("translate", () => {
     expect(translate("en", "map.zoomIn")).toBe("Zoom in");
   });
 });
+
+describe("format", () => {
+  it("replaces placeholders and keeps unknown ones", async () => {
+    const { format, t } = await import("./index");
+    expect(format("{count} von {max}", { count: 3, max: 25 })).toBe("3 von 25");
+    expect(format("{a} {b}", { a: "x" })).toBe("x {b}");
+    expect(t("en", "waypoints.count", { count: 1, max: 25 })).toBe("1 of 25");
+  });
+
+  it("uses the same placeholders in both languages", () => {
+    const placeholders = (s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
+    for (const key of Object.keys(de) as (keyof typeof de)[]) {
+      expect(placeholders(en[key]), key).toEqual(placeholders(de[key]));
+    }
+  });
+});

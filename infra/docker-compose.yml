@@ -10,6 +10,12 @@ services:
     image: ghcr.io/mathias-bloodmoon/harz-web:local
     ports:
       - "${WEB_PORT:-80}:8080"
+    environment:
+      # Local default: on. Production: false until the Harzer Wandernadel office has agreed in writing.
+      STAMPS_ENABLED: ${STAMPS_ENABLED:-true}
+    volumes:
+      # data/stamps.geojson is generated locally (pnpm stamps:build) and never committed or baked into images
+      - ${STAMPS_DATA_DIR:-../data}:/srv/data:ro
     depends_on:
       harz-api:
         condition: service_healthy

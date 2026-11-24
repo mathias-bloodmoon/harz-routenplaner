@@ -24,7 +24,8 @@ Points on the map: 330, of which special: 108
 Stamps per booklet: hwn 222, talsperren 30, burgen-schloesser 32, karstwanderweg 24, lutherweg 10, huy-fallstein 20, sonderstempel 18, klosterwanderweg 16
 ```
 
-The web app shows the file as stamp layer (added in milestone M1b).
+Then `docker compose -f infra/docker-compose.yml up --build` (mounts `data/` into the web container) or
+`pnpm dev` shows the stamp layer.
 
 ## Sources
 
@@ -58,4 +59,5 @@ GeoJSON properties: `number`, `name`, `booklet` (main booklet), `booklets` (all 
 
 ## Tests and CI
 
-Unit tests use synthetic samples (`scripts/test/`); the real data is not needed in CI.
+Unit tests use synthetic samples (`scripts/test/`). E2E tests and CI use the synthetic
+`apps/web/e2e/fixtures/stamps.geojson` (5 made-up points) – the real data is not needed in CI.

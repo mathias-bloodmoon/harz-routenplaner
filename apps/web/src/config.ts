@@ -4,10 +4,10 @@ import type { LatLngBoundsExpression, LatLngExpression } from "leaflet";
 export const HARZ_CENTER: LatLngExpression = [51.75, 10.62];
 export const HARZ_ZOOM = 10;
 
-/** Panning limit: Harz + generous buffer (routing area check comes with M1/M2). */
+/** Panning limit: the planning area (plan/area.ts) plus a margin. */
 export const MAX_BOUNDS: LatLngBoundsExpression = [
-  [50.9, 9.4],
-  [52.5, 11.9],
+  [50.9, 9.2],
+  [52.6, 12.6],
 ];
 
 export const TILES = {

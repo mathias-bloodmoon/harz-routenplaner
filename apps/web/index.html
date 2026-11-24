@@ -33,8 +33,33 @@
           </button>
         </div>
         <div class="panel-body" id="panel-body">
-          <p data-i18n="panel.intro"></p>
-          <p class="hint" data-i18n="panel.comingSoon"></p>
+          <p class="intro" data-i18n="panel.intro"></p>
+          <div id="status" class="status" role="status" aria-live="polite"></div>
+          <section class="section" aria-labelledby="wp-title">
+            <div class="section-head">
+              <h2 id="wp-title" tabindex="-1" data-i18n="waypoints.title"></h2>
+              <span id="wp-count" class="count"></span>
+            </div>
+            <p id="wp-empty" class="hint" data-i18n="waypoints.empty"></p>
+            <ol id="wp-list" class="wp-list"></ol>
+            <p id="wp-hint" class="hint"></p>
+            <div class="toolbar" id="wp-toolbar">
+              <button type="button" class="button" id="wp-reverse" data-i18n="waypoints.reverse"></button>
+              <button type="button" class="button" id="wp-clear" data-i18n="waypoints.clear"></button>
+            </div>
+          </section>
+          <section class="section" id="stamps-section" aria-labelledby="stamps-title" hidden>
+            <h2 id="stamps-title" data-i18n="stamps.title"></h2>
+            <label class="check">
+              <input type="checkbox" id="stamps-toggle" checked />
+              <span data-i18n="stamps.show"></span>
+            </label>
+            <fieldset id="booklet-filter" class="booklets">
+              <legend data-i18n="stamps.booklets"></legend>
+              <div id="booklet-list"></div>
+            </fieldset>
+            <p id="stamps-error" class="error" data-i18n="stamps.unavailable" hidden></p>
+          </section>
         </div>
       </aside>
       <main class="map-wrap">

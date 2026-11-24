@@ -6,6 +6,11 @@ All notable changes to this project. Format based on [Keep a Changelog](https://
 
 ### Added
 
+- M1b stamp layer: clusters, popups (number, name, booklets, link), booklet filter, layer toggle; runtime flag
+  `STAMPS_ENABLED` via `/config.json` (web image default `false`); `data/` mounted read-only into the web container.
+- M1b waypoints: add by map click or from a stamp popup, drag, reorder (keyboard), delete, reverse, clear; 2–25
+  waypoints inside the planning area; plan stored in localStorage; status messages in a live region.
+
 - M1a stamp data converter `scripts/stamps`: official GPX (222 stamps, pinned by SHA-256) + one-time extraction
   of the companion booklet pages → `data/stamps.geojson`. Generated locally, not committed (licence, see
   `data/README.md`).

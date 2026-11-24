@@ -1,0 +1,66 @@
+{
+  "type": "FeatureCollection",
+  "metadata": { "note": "Synthetic test data for E2E tests – not the real Harzer Wandernadel stamp points." },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [10.45, 51.86] },
+      "properties": {
+        "number": "1",
+        "name": "Teststempel Nordwest",
+        "booklet": "hwn",
+        "booklets": ["hwn", "talsperren"],
+        "special": false,
+        "source": "https://www.harzer-wandernadel.de/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [10.8, 51.86] },
+      "properties": {
+        "number": "2",
+        "name": "Teststempel Nordost & Hütte",
+        "booklet": "hwn",
+        "booklets": ["hwn"],
+        "special": false,
+        "source": "https://www.harzer-wandernadel.de/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [10.45, 51.64] },
+      "properties": {
+        "number": "3",
+        "name": "Teststempel Südwest",
+        "booklet": "hwn",
+        "booklets": ["hwn"],
+        "special": false,
+        "source": "https://www.harzer-wandernadel.de/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [10.8, 51.64] },
+      "properties": {
+        "number": "TS1",
+        "name": "Testsperre",
+        "booklet": "talsperren",
+        "booklets": ["talsperren"],
+        "special": true,
+        "source": "https://www.harzer-wandernadel.de/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [11.0, 51.75] },
+      "properties": {
+        "number": "9901",
+        "name": "Test-Sonderstempel",
+        "booklet": "sonderstempel",
+        "booklets": ["sonderstempel"],
+        "special": true,
+        "source": "https://www.harzer-wandernadel.de/"
+      }
+    }
+  ]
+}
