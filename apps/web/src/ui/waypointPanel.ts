@@ -71,12 +71,8 @@ export function createWaypointPanel(actions: WaypointPanelActions): WaypointPane
             "li",
             { className: "wp-item", "data-id": w.id },
             h("span", { className: "wp-badge", "aria-hidden": "true" }, label),
-            h(
-              "span",
-              { className: "wp-name" },
-              h("span", { className: "visually-hidden" }, `${label}: `),
-              name,
-            ),
+            h("span", { className: "visually-hidden" }, `${label}: `),
+            h("span", { className: "wp-name" }, name),
             iconButton("up", "↑", t(language, "waypoints.moveUp", { name }), index === 0, () =>
               actions.reorder(index, index - 1),
             ),
