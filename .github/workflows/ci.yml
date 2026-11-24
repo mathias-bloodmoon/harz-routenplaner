@@ -43,6 +43,15 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      - name: BRouter segments (cached, ~300 MB)
+        id: segments
+        uses: actions/cache@v6
+        with:
+          path: data/segments
+          key: brouter-segments-E5_N50-E10_N50-v1
+      - name: Download BRouter segments
+        if: steps.segments.outputs.cache-hit != 'true'
+        run: scripts/brouter/download-segments.sh
       - name: Start stack (docker compose)
         # Synthetic stamp data: the real data must not be published (data/README.md)
         run: docker compose -f infra/docker-compose.yml up --build --detach --wait --wait-timeout 180
@@ -54,7 +63,8 @@ jobs:
           curl --fail --silent http://localhost/api/health | grep -q '"status":"ok"'
           curl --fail --silent http://localhost/config.json | grep -q '"stampsEnabled": true'
           curl --fail --silent http://localhost/data/stamps.geojson | grep -q FeatureCollection
-          docker stats --no-stream --format "table {{.Name}}\t{{.MemUsage}}"
+      - name: Routing integration (real BRouter, sample tours)
+        run: scripts/brouter/smoke-test.sh http://localhost
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps chromium
       - name: Playwright E2E against the compose stack
@@ -67,6 +77,8 @@ jobs:
           E2E_BASE_URL: http://localhost
           E2E_REAL_TILES: "1"
           SCREENSHOTS: "1"
+      - name: Memory use of the stack
+        run: docker stats --no-stream --format "table {{.Name}}\t{{.MemUsage}}"
       - name: Production default hides the stamp layer (STAMPS_ENABLED unset → false in the image)
         run: |
           docker compose -f infra/docker-compose.yml up --detach --wait --no-build harz-web

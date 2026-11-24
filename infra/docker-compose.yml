@@ -1,5 +1,6 @@
 # Local stack: docker compose -f infra/docker-compose.yml up --build  →  http://localhost
-# Production variant (network "edge", no published ports) follows with M5.
+# Needs the BRouter segments first: scripts/brouter/download-segments.sh (~300 MB, see infra/README.md).
+# Production variant (network "edge", no published ports) follows with M5. Memory: 64 + 256 + 512 MB ≤ 1 GB.
 name: harz-routenplaner
 
 services:
@@ -30,5 +31,25 @@ services:
     environment:
       API_PORT: "3000"
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      BROUTER_URL: http://brouter:17777
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-20}
+      # proxies in front of the api: 1 = nginx (local); production (Caddy + nginx) uses 2
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
+    depends_on:
+      brouter:
+        condition: service_healthy
     restart: unless-stopped
     mem_limit: 256m
+
+  brouter:
+    build:
+      context: ..
+      dockerfile: infra/brouter/Dockerfile
+    image: ghcr.io/mathias-bloodmoon/harz-brouter:local
+    volumes:
+      - ${SEGMENTS_DIR:-../data/segments}:/segments:ro
+    ports:
+      # local debugging only (e.g. scripts/brouter/record-fixtures.sh); bound to localhost
+      - "127.0.0.1:${BROUTER_PORT:-17777}:17777"
+    restart: unless-stopped
+    mem_limit: 512m
