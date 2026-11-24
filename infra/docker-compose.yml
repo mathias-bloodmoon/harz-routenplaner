@@ -1,0 +1,28 @@
+# Local stack: docker compose -f infra/docker-compose.yml up --build  →  http://localhost
+# Production variant (network "edge", no published ports) follows with M5.
+name: harz-routenplaner
+
+services:
+  harz-web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    image: ghcr.io/mathias-bloodmoon/harz-web:local
+    ports:
+      - "${WEB_PORT:-80}:8080"
+    depends_on:
+      harz-api:
+        condition: service_healthy
+    restart: unless-stopped
+    mem_limit: 64m
+
+  harz-api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    image: ghcr.io/mathias-bloodmoon/harz-api:local
+    environment:
+      API_PORT: "3000"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    restart: unless-stopped
+    mem_limit: 256m

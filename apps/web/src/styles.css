@@ -1,0 +1,209 @@
+:root {
+  --green: #2f6b3a;
+  --green-dark: #1f4a27;
+  --text: #1c2320;
+  --muted: #4a5550;
+  --bg: #ffffff;
+  --bg-soft: #f3f5f2;
+  --border: #d5dbd5;
+  --focus: #0b57d0;
+  --panel-width: 360px;
+  --header-height: 56px;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+.layout {
+  display: flex;
+  height: 100dvh;
+}
+
+.panel {
+  width: var(--panel-width);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  z-index: 1000;
+  transition: width 0.2s ease;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--header-height);
+  padding: 6px 10px;
+  background: var(--green);
+  color: #fff;
+}
+
+.panel-header h1 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-body {
+  padding: 16px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.icon-button,
+.lang-toggle {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid rgb(255 255 255 / 0.6);
+  background: transparent;
+  color: #fff;
+}
+
+.lang-toggle {
+  font-weight: 600;
+  padding: 0 12px;
+}
+
+.icon-button:hover,
+.lang-toggle:hover {
+  background: var(--green-dark);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.panel-header :focus-visible {
+  outline-color: #fff;
+}
+
+.panel-toggle-icon::before {
+  content: "‹";
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.panel.collapsed {
+  width: calc(44px + 20px);
+}
+
+.panel.collapsed .panel-body,
+.panel.collapsed h1,
+.panel.collapsed .lang-toggle {
+  display: none;
+}
+
+.panel.collapsed .panel-toggle-icon::before {
+  content: "›";
+}
+
+.panel.collapsed .panel-header {
+  flex-direction: column;
+}
+
+.map-wrap {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+.leaflet-control-attribution {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Phones: map full screen, panel as bottom sheet */
+@media (max-width: 700px) {
+  .layout {
+    display: block;
+    position: relative;
+  }
+
+  .map-wrap {
+    position: absolute;
+    inset: 0;
+  }
+
+  .panel,
+  .panel.collapsed {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 55dvh;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    border-radius: 14px 14px 0 0;
+    overflow: hidden;
+    box-shadow: 0 -4px 16px rgb(0 0 0 / 0.15);
+    transition: none;
+  }
+
+  .panel.collapsed .panel-header {
+    flex-direction: row;
+  }
+
+  .panel.collapsed h1,
+  .panel.collapsed .lang-toggle {
+    display: block;
+  }
+
+  .panel-toggle-icon::before {
+    content: "⌄";
+  }
+
+  .panel.collapsed .panel-toggle-icon::before {
+    content: "⌃";
+  }
+
+  /* the bottom sheet covers the bottom of the map: show attribution at the top instead */
+  .leaflet-bottom.leaflet-right {
+    top: 0;
+    bottom: auto;
+    left: 0;
+    right: 56px;
+  }
+
+  .leaflet-bottom.leaflet-right .leaflet-control-attribution {
+    float: left;
+    font-size: 11px;
+  }
+}

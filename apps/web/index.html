@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Kostenloser Wander-Routenplaner für den Harz" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Harz Routenplaner</title>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="panel" id="panel" aria-labelledby="panel-title">
+        <div class="panel-header">
+          <button
+            type="button"
+            class="icon-button panel-toggle"
+            id="panel-toggle"
+            aria-controls="panel-body"
+            aria-expanded="true"
+            data-i18n-attr="aria-label:panel.collapse;title:panel.collapse"
+          >
+            <span aria-hidden="true" class="panel-toggle-icon"></span>
+          </button>
+          <h1 id="panel-title" data-i18n="app.title">Harz Routenplaner</h1>
+          <button
+            type="button"
+            class="lang-toggle"
+            id="lang-toggle"
+            data-i18n="lang.switch"
+            data-i18n-attr="aria-label:lang.switchLabel"
+          >
+            EN
+          </button>
+        </div>
+        <div class="panel-body" id="panel-body">
+          <p data-i18n="panel.intro"></p>
+          <p class="hint" data-i18n="panel.comingSoon"></p>
+        </div>
+      </aside>
+      <main class="map-wrap">
+        <div id="map" role="region" data-i18n-attr="aria-label:map.label"></div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
