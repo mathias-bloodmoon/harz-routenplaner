@@ -1,15 +1,5 @@
 import { expect, test } from "./fixtures";
 
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    // Start every test in German, independent of the browser locale.
-    if (!sessionStorage.getItem("e2e-init")) {
-      localStorage.setItem("harz-routenplaner:language", "de");
-      sessionStorage.setItem("e2e-init", "1");
-    }
-  });
-});
-
 test("shows the Harz map with attribution", async ({ page }) => {
   const tileRequest = page.waitForRequest(/tile\.opentopomap\.org\/\d+\/\d+\/\d+\.png/);
   await page.goto("/");

@@ -1,3 +1,10 @@
+# Rendered by the nginx image at start (envsubst): ${STAMPS_ENABLED} is replaced, nginx variables are kept.
+# Stamp layer gate (CONCEPT.md §3): only the literal value "true" enables it.
+map "${STAMPS_ENABLED}" $stamps_enabled {
+    default "false";
+    "true"  "true";
+}
+
 server {
     listen 8080;
     server_name _;
@@ -14,6 +21,22 @@ server {
     location = /healthz {
         default_type text/plain;
         return 200 "ok\n";
+    }
+
+    # Runtime configuration for the frontend
+    location = /config.json {
+        default_type application/json;
+        expires -1;
+        return 200 '{"stampsEnabled": $stamps_enabled}';
+    }
+
+    # Stamp data is mounted at /srv/data (not baked into the public image, see data/README.md)
+    location = /data/stamps.geojson {
+        if ($stamps_enabled != "true") {
+            return 404;
+        }
+        default_type application/geo+json;
+        alias /srv/data/stamps.geojson;
     }
 
     location /api/ {

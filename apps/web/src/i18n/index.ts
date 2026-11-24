@@ -28,3 +28,14 @@ export function resolveInitialLanguage(stored: string | null, browserLanguages: 
 export function translate(language: Language, key: MessageKey): string {
   return messages[language][key];
 }
+
+/** Replaces {name} placeholders. Unknown placeholders are left as they are. */
+export function format(template: string, params: Record<string, string | number> = {}): string {
+  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
+    key in params ? String(params[key]) : match,
+  );
+}
+
+export function t(language: Language, key: MessageKey, params?: Record<string, string | number>): string {
+  return format(translate(language, key), params);
+}

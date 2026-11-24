@@ -13,6 +13,14 @@ export const test = base.extend({
         route.fulfill({ status: 200, contentType: "image/png", body: EMPTY_PNG }),
       );
     }
+    // Start every test in German with an empty plan; reloads within a test keep their state.
+    await page.addInitScript(() => {
+      if (!sessionStorage.getItem("e2e-init")) {
+        localStorage.clear();
+        localStorage.setItem("harz-routenplaner:language", "de");
+        sessionStorage.setItem("e2e-init", "1");
+      }
+    });
     await use(page);
   },
 });

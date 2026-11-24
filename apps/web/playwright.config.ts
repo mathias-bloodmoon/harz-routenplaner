@@ -22,6 +22,7 @@ export default defineConfig({
           url: baseURL,
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,
+          env: { STAMPS_ENABLED: "true", STAMPS_FILE: "e2e/fixtures/stamps.geojson" },
         },
       }),
 });

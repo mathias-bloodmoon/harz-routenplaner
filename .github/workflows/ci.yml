@@ -44,11 +44,16 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - name: Start stack (docker compose)
+        # Synthetic stamp data: the real data must not be published (data/README.md)
         run: docker compose -f infra/docker-compose.yml up --build --detach --wait --wait-timeout 180
+        env:
+          STAMPS_DATA_DIR: ../apps/web/e2e/fixtures
       - name: Smoke check stack
         run: |
           curl --fail --silent http://localhost/ | grep -q "<title>Harz Routenplaner</title>"
           curl --fail --silent http://localhost/api/health | grep -q '"status":"ok"'
+          curl --fail --silent http://localhost/config.json | grep -q '"stampsEnabled": true'
+          curl --fail --silent http://localhost/data/stamps.geojson | grep -q FeatureCollection
           docker stats --no-stream --format "table {{.Name}}\t{{.MemUsage}}"
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps chromium
@@ -62,6 +67,14 @@ jobs:
           E2E_BASE_URL: http://localhost
           E2E_REAL_TILES: "1"
           SCREENSHOTS: "1"
+      - name: Production default hides the stamp layer (STAMPS_ENABLED unset → false in the image)
+        run: |
+          docker compose -f infra/docker-compose.yml up --detach --wait --no-build harz-web
+          curl --silent http://localhost/config.json | grep -q '"stampsEnabled": false'
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://localhost/data/stamps.geojson)" = 404
+        env:
+          STAMPS_ENABLED: "false"
+          STAMPS_DATA_DIR: ../apps/web/e2e/fixtures
       - uses: actions/upload-artifact@v7
         if: always()
         with:

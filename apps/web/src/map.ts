@@ -7,14 +7,19 @@ import { translate } from "./i18n";
 export interface HarzMap {
   map: L.Map;
   setLanguage(language: Language): void;
+  /** Adds/removes "Stamp points: © Harzer Wandernadel" (visible whenever the stamp layer is shown). */
+  setStampAttribution(visible: boolean): void;
 }
 
-function attribution(language: Language): string {
+function attribution(language: Language, stamps: boolean): string {
   const t = (key: Parameters<typeof translate>[1]) => translate(language, key);
   return [
     `${t("attribution.osm")}: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>`,
     `SRTM | ${t("attribution.style")}: © <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)`,
     `${t("attribution.trails")}: © <a href="https://waymarkedtrails.org">Waymarked Trails</a>`,
+    ...(stamps
+      ? [`${t("attribution.stamps")}: © <a href="https://www.harzer-wandernadel.de">Harzer Wandernadel</a>`]
+      : []),
   ].join(", ");
 }
 
@@ -30,7 +35,9 @@ export function createMap(element: HTMLElement, language: Language): HarzMap {
   });
 
   const attributionControl = L.control.attribution({ prefix: false }).addTo(map);
-  let currentAttribution = attribution(language);
+  let currentLanguage = language;
+  let stampsShown = false;
+  let currentAttribution = attribution(language, stampsShown);
   attributionControl.addAttribution(currentAttribution);
 
   L.tileLayer(TILES.topo.url, {
@@ -47,10 +54,15 @@ export function createMap(element: HTMLElement, language: Language): HarzMap {
 
   let zoomControl = L.control.zoom({ position: "topright" });
 
-  function setLanguage(next: Language): void {
+  function refreshAttribution(): void {
     attributionControl.removeAttribution(currentAttribution);
-    currentAttribution = attribution(next);
+    currentAttribution = attribution(currentLanguage, stampsShown);
     attributionControl.addAttribution(currentAttribution);
+  }
+
+  function setLanguage(next: Language): void {
+    currentLanguage = next;
+    refreshAttribution();
 
     zoomControl.remove();
     zoomControl = L.control.zoom({
@@ -62,5 +74,12 @@ export function createMap(element: HTMLElement, language: Language): HarzMap {
   }
 
   setLanguage(language);
-  return { map, setLanguage };
+  return {
+    map,
+    setLanguage,
+    setStampAttribution(visible) {
+      stampsShown = visible;
+      refreshAttribution();
+    },
+  };
 }

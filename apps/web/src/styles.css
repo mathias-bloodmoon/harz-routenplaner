@@ -207,3 +207,257 @@ button {
     font-size: 11px;
   }
 }
+
+/* ---------- panel content (M1) ---------- */
+.intro {
+  margin-top: 0;
+}
+
+.section {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.section h2 {
+  font-size: 1.05rem;
+  margin: 0 0 8px;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.count {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.status:empty {
+  display: none;
+}
+
+.status {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg-soft);
+  border-left: 4px solid var(--green);
+  font-size: 0.95rem;
+}
+
+.status.is-error,
+.error {
+  border-left-color: #b3261e;
+  color: #8c1d18;
+  background: #fbeceb;
+}
+
+.error {
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.wp-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wp-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+  border-bottom: 1px solid var(--bg-soft);
+}
+
+.wp-badge {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+}
+
+.wp-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding-left: 4px;
+}
+
+.icon-btn {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.15rem;
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: var(--bg-soft);
+  border-color: var(--border);
+}
+
+.icon-btn:disabled {
+  color: #9aa39e;
+  cursor: default;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.button {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--green);
+  background: #fff;
+  color: var(--green-dark);
+  font-weight: 600;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--bg-soft);
+}
+
+.button:disabled {
+  border-color: var(--border);
+  color: #8a938e;
+  cursor: default;
+}
+
+.button.primary {
+  background: var(--green);
+  color: #fff;
+}
+
+.button.primary:hover {
+  background: var(--green-dark);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.check input {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  accent-color: var(--green);
+}
+
+.check .count {
+  margin-left: auto;
+}
+
+.booklets {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0 0;
+  padding: 4px 12px 8px;
+}
+
+.booklets legend {
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+.booklets:disabled {
+  opacity: 0.55;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- map markers ---------- */
+.wp-marker span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #c62828;
+  color: #fff;
+  font-weight: 700;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
+}
+
+.stamp-marker span,
+.stamp-cluster span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+}
+
+.stamp-marker span {
+  background: #1d4f91;
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: 10px;
+  letter-spacing: -0.3px;
+}
+
+.stamp-marker.special span {
+  background: #a5520c;
+}
+
+.stamp-cluster span {
+  background: rgb(29 79 145 / 0.85);
+  color: #fff;
+  border: 3px solid rgb(255 255 255 / 0.8);
+  font-size: 13px;
+}
+
+.leaflet-marker-icon:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.stamp-popup p {
+  margin: 0 0 6px;
+}
+
+.stamp-kind {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.stamp-name {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.stamp-booklets {
+  font-size: 0.85rem;
+}
