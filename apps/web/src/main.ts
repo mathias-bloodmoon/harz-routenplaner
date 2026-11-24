@@ -114,7 +114,13 @@ async function start(): Promise<void> {
   let routes: Route[] | null = null;
   let selectedRouteId: string | null = null;
   let pending: AbortController | null = null;
-  const routeLayer = createRouteLayer(harzMap.map, (id) => selectRoute(id));
+  const panelElement = byId("panel");
+  const routeLayer = createRouteLayer(
+    harzMap.map,
+    (id) => selectRoute(id),
+    // bottom-sheet layout (phones): the panel overlaps the map
+    () => (window.matchMedia("(max-width: 700px)").matches ? panelElement.offsetHeight : 0),
+  );
   const routePanel = createRoutePanel(
     () => void calculate(),
     (id) => selectRoute(id),

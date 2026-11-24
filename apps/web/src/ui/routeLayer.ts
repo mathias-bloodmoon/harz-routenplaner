@@ -8,7 +8,12 @@ export interface RouteLayer {
 }
 
 /** Draws the alternatives; the selected one on top and opaque, the others faded. Click selects. */
-export function createRouteLayer(map: L.Map, onSelect: (id: string) => void): RouteLayer {
+export function createRouteLayer(
+  map: L.Map,
+  onSelect: (id: string) => void,
+  /** Pixels at the bottom of the map hidden by the bottom sheet (phones), so routes are fitted above it. */
+  bottomInset: () => number = () => 0,
+): RouteLayer {
   const group = L.layerGroup().addTo(map);
 
   return {
@@ -43,7 +48,11 @@ export function createRouteLayer(map: L.Map, onSelect: (id: string) => void): Ro
         const bounds = L.latLngBounds(
           routes.flatMap((r) => r.coordinates.map(([lng, lat]) => L.latLng(lat, lng))),
         );
-        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+        map.fitBounds(bounds, {
+          paddingTopLeft: [30, 30],
+          paddingBottomRight: [30, 30 + bottomInset()],
+          maxZoom: 15,
+        });
       }
     },
     clear() {
