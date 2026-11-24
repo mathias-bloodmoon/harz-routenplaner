@@ -39,6 +39,10 @@ export function createElevationChart(
         const i = indexAtDistance(profile.distances, s.atM);
         marks[i] = ys[i] ?? null;
       }
+      const number = new Intl.NumberFormat(language === "de" ? "de-DE" : "en-GB", {
+        maximumFractionDigits: 1,
+      });
+      const values = (_u: uPlot, splits: number[]) => splits.map((v) => number.format(v));
       const options: uPlot.Options = {
         width: width(),
         height: HEIGHT,
@@ -48,6 +52,7 @@ export function createElevationChart(
         axes: [
           {
             label: t(language, "chart.distance"),
+            values,
             size: 36,
             labelSize: 14,
             font: "11px system-ui",
@@ -55,6 +60,7 @@ export function createElevationChart(
           },
           {
             label: t(language, "chart.elevation"),
+            values,
             size: 50,
             labelSize: 14,
             font: "11px system-ui",
