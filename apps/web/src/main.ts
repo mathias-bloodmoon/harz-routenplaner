@@ -27,7 +27,10 @@ import { filterByBooklets, loadStamps } from "./stamps/data";
 import type { Stamp } from "./stamps/types";
 import { loadItem, saveItem } from "./storage";
 import { byId } from "./ui/dom";
+import { buildGpx, gpxFileName } from "./export/gpx";
+import { routeToGpx } from "./export/routeGpx";
 import { createDetailsPanel } from "./ui/detailsPanel";
+import { saveFile, setupExportDialog } from "./ui/exportDialog";
 import { createElevationChart } from "./ui/elevationChart";
 import { createRouteLayer } from "./ui/routeLayer";
 import { createRoutePanel, routeName } from "./ui/routePanel";
@@ -215,6 +218,30 @@ async function start(): Promise<void> {
     showHover(null);
     chart.highlight(null);
   });
+
+  // ---- GPX export ----
+  const exportDialog = setupExportDialog(() => {
+    const route = selectedRoute();
+    const profile = route ? profiles.get(route.id) : undefined;
+    if (!route || !profile) return;
+    const now = new Date();
+    const gpx = buildGpx(
+      routeToGpx({
+        route,
+        routeName: routeName(route, language),
+        profile,
+        waypoints: plan.waypoints,
+        stamps: stampsAlongRoute(allStamps, route.coordinates, profile.distances),
+        speedKmh: plan.speedKmh,
+        language,
+        now,
+      }),
+    );
+    const file = gpxFileName(now);
+    saveFile(file, gpx, "application/gpx+xml");
+    showStatus("export.downloaded", { file });
+  });
+  byId("export-open").addEventListener("click", () => exportDialog.open());
 
   // ---- speed ----
   const speedInput = byId<HTMLInputElement>("speed");

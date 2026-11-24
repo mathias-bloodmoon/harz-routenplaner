@@ -6,7 +6,7 @@ No login, no tracking.
 
 - Live (planned): https://routing.pixelcenter.de
 - Specification: [CONCEPT.md](CONCEPT.md) · Rules for agents: [CLAUDE.md](CLAUDE.md) · Changes: [CHANGELOG.md](CHANGELOG.md)
-- Status: milestones M0–M3 (map, DE/EN, stamp points, waypoints, routing, elevation profile and walking time). See CONCEPT.md §7.
+- Status: milestones M0–M4 (map, DE/EN, stamp points, waypoints, routing, elevation profile, walking time, GPX export). Next: M5 go-live. See CONCEPT.md §7.
 
 ## Run locally with Docker (recommended)
 
@@ -96,7 +96,13 @@ Configuration is done with environment variables, see [.env.example](.env.exampl
     remainder to the end is added, so ascent − descent = net change. Cards and details use the same values.
   - DIN 33466 (`details/walkingTime.ts`): horizontal = distance ÷ speed; vertical = ascent ÷ 300 m/h + descent ÷
     500 m/h; total = larger + half of the smaller. Example: 12 km, 600 m up and down, 4 km/h → 4 h 42 min.
-- Pure, unit-tested logic: `apps/web/src/details/` (walking time, elevation, stamps along the route), `apps/web/src/plan/` (waypoints, area check, stored state), `apps/web/src/stamps/data.ts`
+- GPX export (M4): **GPX exportieren** opens a dialog with the Komoot steps (Profile → Saved routes → Import a
+  file; do **not** tick "Match route to known ways") and downloads `harz-route-YYYY-MM-DD.gpx`, built in the
+  browser: GPX 1.1, `<metadata>` (name, description with km, ↑↓, DIN time; creator "Harz Routenplaner"), one
+  `<trk>` with all points and `<ele>`, `<wpt>` for the waypoints (A, B …) and the stamp points on the route.
+  The unit tests validate the output against the official GPX 1.1 schema (`apps/web/src/export/test/gpx-1.1.xsd`).
+  `apps/web/scripts/sample-gpx.ts` writes the three sample tours of the Komoot check from a running stack.
+- Pure, unit-tested logic: `apps/web/src/export/` (GPX builder, route → GPX), `apps/web/src/details/` (walking time, elevation, stamps along the route), `apps/web/src/plan/` (waypoints, area check, stored state), `apps/web/src/stamps/data.ts`
   (parsing, booklet filter), `scripts/stamps/` (converter).
 
 ## Technical decisions

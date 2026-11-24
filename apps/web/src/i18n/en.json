@@ -86,5 +86,19 @@
   "chart.stamps": "Stamp points",
   "details.stampsTitle": "Stamp points along the route",
   "details.stampsNone": "No stamp point closer than 100 m to the route.",
-  "details.stampAt": "at {distance}"
+  "details.stampAt": "at {distance}",
+  "export.button": "Export GPX",
+  "export.title": "GPX file for Komoot",
+  "export.intro": "The file contains the selected route with elevations, your waypoints and the stamp points along the route.",
+  "export.step1": "Download the file.",
+  "export.step2": "Open komoot.com in your browser and log in.",
+  "export.step3": "Go to Profile → Saved routes (planned tours) → “Import a file” and choose the file.",
+  "export.tip": "Tip: do not tick “Match route to known ways” when importing – otherwise Komoot recalculates the route and it differs from your plan.",
+  "export.app": "The tour then also appears in the Komoot app under planned tours.",
+  "export.download": "Download file",
+  "export.close": "Close",
+  "export.downloaded": "{file} downloaded.",
+  "export.metaDesc": "{distance} · ↑ {ascent} · ↓ {descent} · walking time {time} (DIN 33466, {speed} km/h)",
+  "export.waypoint": "Waypoint {label}",
+  "export.stamp": "Stamp point"
 }

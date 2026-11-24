@@ -86,5 +86,19 @@
   "chart.stamps": "Stempelstellen",
   "details.stampsTitle": "Stempelstellen an der Route",
   "details.stampsNone": "Keine Stempelstelle näher als 100 m an der Route.",
-  "details.stampAt": "bei {distance}"
+  "details.stampAt": "bei {distance}",
+  "export.button": "GPX exportieren",
+  "export.title": "GPX-Datei für Komoot",
+  "export.intro": "Die Datei enthält die ausgewählte Route mit Höhenangaben, deine Wegpunkte und die Stempelstellen an der Route.",
+  "export.step1": "Lade die Datei herunter.",
+  "export.step2": "Öffne komoot.com im Browser und melde dich an.",
+  "export.step3": "Gehe zu Profil → Geplante Touren → „Datei importieren“ und wähle die Datei aus.",
+  "export.tip": "Tipp: Setze beim Import keinen Haken bei „An bekannte Wege anpassen“ – sonst rechnet Komoot die Route neu und sie weicht von deiner Planung ab.",
+  "export.app": "Danach findest du die Tour auch in der Komoot-App unter „Geplante Touren“.",
+  "export.download": "Datei herunterladen",
+  "export.close": "Schließen",
+  "export.downloaded": "{file} heruntergeladen.",
+  "export.metaDesc": "{distance} · ↑ {ascent} · ↓ {descent} · Gehzeit {time} (DIN 33466, {speed} km/h)",
+  "export.waypoint": "Wegpunkt {label}",
+  "export.stamp": "Stempelstelle"
 }

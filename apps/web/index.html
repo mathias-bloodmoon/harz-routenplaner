@@ -73,6 +73,12 @@
             <ul id="route-cards" class="route-cards"></ul>
             <div id="details" class="details" aria-labelledby="details-title">
               <h3 id="details-title" data-i18n="details.title"></h3>
+              <button
+                type="button"
+                class="button primary wide"
+                id="export-open"
+                data-i18n="export.button"
+              ></button>
               <dl id="route-stats" class="stats"></dl>
               <p class="hint small" data-i18n="details.timeHint"></p>
               <div id="elevation-chart" class="chart" role="img"></div>
@@ -99,6 +105,26 @@
         <div id="map" role="region" data-i18n-attr="aria-label:map.label"></div>
       </main>
     </div>
+    <dialog id="export-dialog" class="dialog" aria-labelledby="export-title">
+      <h2 id="export-title" data-i18n="export.title"></h2>
+      <p data-i18n="export.intro"></p>
+      <ol>
+        <li data-i18n="export.step1"></li>
+        <li data-i18n="export.step2"></li>
+        <li data-i18n="export.step3"></li>
+      </ol>
+      <p class="tip" data-i18n="export.tip"></p>
+      <p class="hint" data-i18n="export.app"></p>
+      <div class="toolbar">
+        <button
+          type="button"
+          class="button primary"
+          id="export-download"
+          data-i18n="export.download"
+        ></button>
+        <button type="button" class="button" id="export-close" data-i18n="export.close"></button>
+      </div>
+    </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -6,6 +6,10 @@ All notable changes to this project. Format based on [Keep a Changelog](https://
 
 ### Added
 
+- M4 GPX export: pure GPX 1.1 builder (schema-validated in tests, XML escaping), export dialog with Komoot
+  instructions, download `harz-route-YYYY-MM-DD.gpx` generated in the browser with track, elevations, waypoints
+  and stamp points on the route; script for the sample tours of the Komoot check.
+
 - M3 route details: DIN 33466 walking time (main) and distance ÷ speed (secondary), length, ascent/descent with
   5 m hysteresis (also used on the cards), lowest/highest point, uPlot elevation chart with stamp points,
   chart ↔ map hover sync, stamp points within 100 m of the route, speed input (stored with the plan).
