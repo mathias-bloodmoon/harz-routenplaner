@@ -70,6 +70,7 @@ test("chart hover shows the position on the map and map hover moves the chart cu
   test.skip(testInfo.project.name !== "desktop", "hover needs a mouse");
   await showRoutes(page);
   const chart = page.locator("#elevation-chart .u-over");
+  await chart.scrollIntoViewIfNeeded();
   const box = (await chart.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await expect(page.locator(".hover-marker")).toBeVisible();
