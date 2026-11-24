@@ -6,6 +6,10 @@ All notable changes to this project. Format based on [Keep a Changelog](https://
 
 ### Added
 
+- M2b routing UI: "Routen berechnen" (enabled from 2 waypoints) with loading state, alternatives as coloured
+  lines and cards (name, km, ↑ ↓), selection by card or line (others fade), "only N distinct routes" message,
+  signage note, clear messages for every api error; routes are dropped when the waypoints change.
+
 - M2a routing backend: BRouter 1.7.10 container with three generated Harz hiking profiles (shortest,
   trail-friendly, gentle) and segment download script; `POST /api/route` with validation, 2 waypoints → engine
   alternatives, 3+ → one route per profile, de-duplication (> 90 % overlap), per-IP rate limit, in-memory cache,
