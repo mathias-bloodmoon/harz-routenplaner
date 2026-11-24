@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint, typecheck, unit tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  e2e:
+    name: Docker Compose stack + Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Start stack (docker compose)
+        run: docker compose -f infra/docker-compose.yml up --build --detach --wait --wait-timeout 180
+      - name: Smoke check stack
+        run: |
+          curl --fail --silent http://localhost/ | grep -q "<title>Harz Routenplaner</title>"
+          curl --fail --silent http://localhost/api/health | grep -q '"status":"ok"'
+          docker stats --no-stream --format "table {{.Name}}\t{{.MemUsage}}"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter web exec playwright install --with-deps chromium
+      - name: Playwright E2E against the compose stack
+        run: pnpm e2e
+        env:
+          E2E_BASE_URL: http://localhost
+      - name: Screenshots (1280 px and 390 px, real map tiles)
+        run: pnpm e2e --grep screenshot
+        env:
+          E2E_BASE_URL: http://localhost
+          E2E_REAL_TILES: "1"
+          SCREENSHOTS: "1"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright
+          path: |
+            apps/web/screenshots/
+            apps/web/playwright-report/
+          retention-days: 14
+      - name: Stack logs on failure
+        if: failure()
+        run: docker compose -f infra/docker-compose.yml logs

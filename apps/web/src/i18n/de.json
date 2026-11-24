@@ -1,0 +1,15 @@
+{
+  "app.title": "Harz Routenplaner",
+  "lang.switch": "EN",
+  "lang.switchLabel": "Switch to English",
+  "panel.collapse": "Seitenleiste einklappen",
+  "panel.expand": "Seitenleiste ausklappen",
+  "panel.intro": "Plane deine Wanderung im Harz: Wegpunkte setzen, Routen vergleichen und als GPX für Komoot herunterladen. Kostenlos, ohne Anmeldung, ohne Tracking.",
+  "panel.comingSoon": "Wegpunkte und Routenberechnung folgen in Kürze.",
+  "map.label": "Karte des Harzes",
+  "map.zoomIn": "Hineinzoomen",
+  "map.zoomOut": "Herauszoomen",
+  "attribution.osm": "Kartendaten",
+  "attribution.style": "Kartendarstellung",
+  "attribution.trails": "Wanderwege"
+}

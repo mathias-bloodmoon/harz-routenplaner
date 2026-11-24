@@ -1,0 +1,15 @@
+{
+  "app.title": "Harz Routenplaner",
+  "lang.switch": "DE",
+  "lang.switchLabel": "Auf Deutsch umschalten",
+  "panel.collapse": "Collapse side panel",
+  "panel.expand": "Expand side panel",
+  "panel.intro": "Plan your hike in the Harz: set waypoints, compare routes and download them as GPX for Komoot. Free, no login, no tracking.",
+  "panel.comingSoon": "Waypoints and route calculation are coming soon.",
+  "map.label": "Map of the Harz",
+  "map.zoomIn": "Zoom in",
+  "map.zoomOut": "Zoom out",
+  "attribution.osm": "Map data",
+  "attribution.style": "Map style",
+  "attribution.trails": "Hiking trails"
+}
