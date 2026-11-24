@@ -38,6 +38,9 @@ export function createWaypointLayer(map: L.Map, onMove: (id: string, to: LatLng)
           onMove(w.id, { lat, lng });
         });
         marker.addTo(group);
+        marker
+          .getElement()
+          ?.setAttribute("aria-label", t(language, "waypoints.markerLabel", { label, name: displayName(w) }));
       });
     },
   };

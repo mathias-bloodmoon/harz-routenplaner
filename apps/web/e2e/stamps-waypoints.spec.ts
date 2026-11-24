@@ -96,7 +96,7 @@ test("clicking the map to close a popup does not add a waypoint", async ({ page 
   await page.goto("/");
   await page.getByRole("button", { name: "Stempelstelle 2: Teststempel Nordost & Hütte" }).click();
   await expect(page.locator(".leaflet-popup")).toBeVisible();
-  await clickMap(page, 60, 300);
+  await clickMap(page, 40, 200);
   await expect(page.locator(".leaflet-popup")).toHaveCount(0);
   await expect(waypointItems(page)).toHaveCount(0);
 });

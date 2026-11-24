@@ -84,6 +84,9 @@ export function createStampLayer(
         keyboard: true,
       });
       marker.bindPopup(() => popupContent(stamp));
+      // divIcon markers would otherwise be announced by their content (just the number)
+      const label = t(lang, "stamps.markerLabel", { number: stamp.number, name: stamp.name });
+      marker.on("add", () => marker.getElement()?.setAttribute("aria-label", label));
       return marker;
     });
     cluster.addLayers(markers);

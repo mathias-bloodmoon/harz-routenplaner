@@ -52,7 +52,7 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [11.0, 51.75] },
+      "geometry": { "type": "Point", "coordinates": [10.62, 51.92] },
       "properties": {
         "number": "9901",
         "name": "Test-Sonderstempel",

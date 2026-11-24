@@ -15,7 +15,7 @@ for (const language of ["de", "en"] as const) {
           waypoints: [
             { lat: 51.86, lng: 10.45, name: "Teststempel Nordwest", stampNumber: "1" },
             { lat: 51.8, lng: 10.62 },
-            { lat: 51.75, lng: 11.0, name: "Test-Sonderstempel", stampNumber: "9901" },
+            { lat: 51.92, lng: 10.62, name: "Test-Sonderstempel", stampNumber: "9901" },
           ],
         }),
       );
