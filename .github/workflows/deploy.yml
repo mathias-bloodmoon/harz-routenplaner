@@ -5,8 +5,7 @@ name: Build and deploy
 # CADDY_CONTAINER. Repository variable STAMPS_ENABLED (true/false) switches the stamp layer. See infra/README.md.
 on:
   push:
-    # m5-go-live: first deploy from the PR branch, removed before the merge
-    branches: [main, m5-go-live]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
