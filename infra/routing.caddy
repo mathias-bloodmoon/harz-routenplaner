@@ -1,0 +1,7 @@
+# Copied to /opt/caddy-sites/routing.caddy (imported by the NSC stack's Caddy). Validate before every reload!
+# No "log" directive: no access logs with IP addresses (privacy page).
+routing.pixelcenter.de {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000"
+	reverse_proxy harz-routenplaner-web:8080
+}

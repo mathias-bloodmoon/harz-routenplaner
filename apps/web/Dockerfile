@@ -1,5 +1,6 @@
 # Build context: repository root (see infra/docker-compose.yml)
-FROM node:22-alpine AS build
+# The build stage runs on the build machine's platform (fast multi-arch builds); its output is plain static files.
+FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 RUN corepack enable
 WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
@@ -12,8 +13,12 @@ RUN pnpm --filter web build
 
 FROM nginxinc/nginx-unprivileged:1.29-alpine
 # Stamp layer off unless enabled explicitly (production: only after written permission)
-ENV STAMPS_ENABLED=false
+ENV STAMPS_ENABLED=false \
+    OPERATOR_NAME="" \
+    OPERATOR_ADDRESS="" \
+    OPERATOR_EMAIL=""
 COPY apps/web/nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY apps/web/docker/40-runtime-config.sh /docker-entrypoint.d/40-runtime-config.sh
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1:8080/healthz || exit 1

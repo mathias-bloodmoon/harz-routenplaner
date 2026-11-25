@@ -6,6 +6,11 @@ All notable changes to this project. Format based on [Keep a Changelog](https://
 
 ### Added
 
+- M5 go-live: production stack (`infra/docker-compose.prod.yml`, network `edge`, no ports, ≤ 832 MB), Caddy site
+  file, deploy workflow (read-only server preflight, multi-arch images on ghcr.io, SSH deploy with Caddy
+  validate-then-reload, smoke test incl. Playwright against the live site), pages Impressum, Datenschutz,
+  Datenquellen (DE/EN, operator data at runtime from the server's `.env`), footer links.
+
 - M4 GPX export: pure GPX 1.1 builder (schema-validated in tests, XML escaping), export dialog with Komoot
   instructions, download `harz-route-YYYY-MM-DD.gpx` generated in the browser with track, elevations, waypoints
   and stamp points on the route; script for the sample tours of the Komoot check.

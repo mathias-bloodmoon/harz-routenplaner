@@ -670,3 +670,73 @@ button {
   padding: 8px 10px;
   border-radius: 8px;
 }
+
+/* ---------- legal pages and footer (M5) ---------- */
+.legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.legal-links a,
+.page a {
+  color: #1d4f91;
+}
+
+.legal-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+body.page {
+  background: var(--bg);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 16px;
+  min-height: var(--header-height);
+  background: var(--green);
+}
+
+.page-header .back {
+  color: #fff;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 6px;
+}
+
+.page-body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px 16px 48px;
+  line-height: 1.6;
+}
+
+.page-body h1 {
+  font-size: 1.6rem;
+}
+
+.page-body h2 {
+  font-size: 1.1rem;
+  margin-top: 1.6em;
+}
+
+.page-body address {
+  font-style: normal;
+  display: grid;
+}
+
+.missing {
+  color: #8c1d18;
+}

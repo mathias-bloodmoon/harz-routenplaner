@@ -1,6 +1,7 @@
 # BRouter routing server with the three Harz hiking profiles. Build context: repository root.
 # Segment files (*.rd5) are not part of the image: mount them at /segments (scripts/brouter/download-segments.sh).
-FROM alpine:3.22 AS fetch
+# The fetch stage only downloads and prepares platform-independent files (jar, profiles).
+FROM --platform=$BUILDPLATFORM alpine:3.22 AS fetch
 ARG BROUTER_VERSION=1.7.10
 ARG BROUTER_SHA256=023fec3ba997758e8cd7ab9e1bae52e962af3f00b57683e3de86b84ffad01532
 RUN apk add --no-cache curl
