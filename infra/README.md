@@ -96,6 +96,7 @@ Internet ─443─▶ Caddy (NSC stack, container nsc-portal-caddy-1)
 | `.env`                | created once from `infra/env.production.example`             | **edited on the server**, never overwritten (except `HARZ_TAG`, `HARZ_TAG_PREVIOUS` and – if the repository variable is set – `STAMPS_ENABLED`) |
 | `data/segments/*.rd5` | `download-segments.sh`                                       | downloaded on the first deploy (~300 MB)                                                                                                        |
 | `data/stamps.geojson` | built once by the deploy workflow when the stamp layer is on | never in git or an image                                                                                                                        |
+| `auth/htpasswd`       | written by every deploy from the secret `SITE_BASIC_AUTH`    | apr1 hash only, never the password; mounted read-only into `harz-web`                                                                           |
 
 ### Deploy (automatic)
 
@@ -113,11 +114,25 @@ Every push to `main` runs `.github/workflows/deploy.yml`:
    Playwright `@production` (map, real route, GPX download).
 
 Secrets (Settings → Secrets and variables → Actions): `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`,
-`DEPLOY_KNOWN_HOSTS`, `CADDY_CONTAINER`. Repository **variable** `STAMPS_ENABLED` (`true`/`false`) switches the stamp
+`DEPLOY_KNOWN_HOSTS`, `CADDY_CONTAINER`, `SITE_BASIC_AUTH`. Repository **variable** `STAMPS_ENABLED` (`true`/`false`) switches the stamp
 layer on the next deploy. Server preparation (once): `docs/harz-m5-server.md` in the FlashBot repo, summarised:
 user `nsc` in group `docker`, `/opt/harz-routenplaner` and an empty `/opt/caddy-sites/routing.caddy` owned by `nsc`.
 
 Manual run: GitHub → Actions → "Build and deploy" → Run workflow.
+
+### Password protection
+
+The site is not public: `harz-web` (nginx) asks for a user and password on every path except `/healthz` (Docker
+health check) and sends `X-Robots-Tag: noindex`. Caddy and the NSC stack are not involved.
+
+- User and password: GitHub secret **`SITE_BASIC_AUTH`** in the form `user:password`. The deploy hashes it (apr1) on
+  the runner and writes only the hash to `auth/htpasswd` on the server.
+- **Change the password:** set a new value for the secret, then GitHub → Actions → "Build and deploy" → Run workflow.
+- Fail closed: with `BASIC_AUTH=true` (default in production) and no `auth/htpasswd` the container does not start
+  and the deploy fails – the site never becomes public by accident. `BASIC_AUTH=false` in `.env` makes it public.
+- Locally and in CI the protection is off (`BASIC_AUTH` unset); CI checks the protected variant separately.
+
+**Success looks like:** `curl -s -o /dev/null -w '%{http_code}' https://routing.pixelcenter.de/` prints `401`.
 
 ### Change settings (Impressum address, stamp layer)
 

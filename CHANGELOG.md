@@ -6,6 +6,9 @@ All notable changes to this project. Format based on [Keep a Changelog](https://
 
 ### Added
 
+- Password protection (HTTP basic auth in `harz-web`, user/password from the GitHub secret `SITE_BASIC_AUTH`, only
+  the hash on the server, fail closed without it), `X-Robots-Tag: noindex`; smoke test and Playwright log in.
+
 - M5 go-live: production stack (`infra/docker-compose.prod.yml`, network `edge`, no ports, ≤ 832 MB), Caddy site
   file, deploy workflow (read-only server preflight, multi-arch images on ghcr.io, SSH deploy with Caddy
   validate-then-reload, smoke test incl. Playwright against the live site), pages Impressum, Datenschutz,

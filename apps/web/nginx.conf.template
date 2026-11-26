@@ -14,11 +14,16 @@ server {
     # No access log: routes and IPs are not stored (privacy, see CONCEPT.md §5).
     access_log off;
 
+    # Password protection (basic auth) when BASIC_AUTH=true, written by /docker-entrypoint.d/41-basic-auth.sh
+    include /tmp/runtime/auth.conf;
+
     add_header X-Content-Type-Options nosniff always;
     add_header Referrer-Policy strict-origin-when-cross-origin always;
+    add_header X-Robots-Tag "noindex, nofollow" always;
     add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: https://*.tile.opentopomap.org https://tile.waymarkedtrails.org; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'" always;
 
     location = /healthz {
+        auth_basic off;
         default_type text/plain;
         return 200 "ok\n";
     }
