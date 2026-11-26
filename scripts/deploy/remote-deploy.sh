@@ -2,7 +2,8 @@
 # Runs ON THE SERVER (nsc-demo) as user nsc, started by .github/workflows/deploy.yml.
 # Usage: remote-deploy.sh <image tag> <caddy container> [stamps true|false]
 #   The third argument comes from the GitHub repository variable STAMPS_ENABLED; when given, it is written to .env.
-# Reads the ghcr.io token for this run from stdin (logged out again at the end).
+# stdin, line 1: the ghcr.io token for this run (logged out again at the end);
+#        line 2: the htpasswd line "user:$apr1$…" for the password protection (written to auth/htpasswd).
 # Never touches /opt/nsc-portal; publishes no ports; validates the Caddy file before reloading Caddy.
 set -eu
 TAG=$1
@@ -11,6 +12,8 @@ STAMPS=${3:-}
 APP=/opt/harz-routenplaner
 SITE=/opt/caddy-sites/routing.caddy
 cd "$APP"
+IFS= read -r GHCR_TOKEN || true
+IFS= read -r HTPASSWD || true
 compose() { docker compose -f "$APP/docker-compose.yml" "$@"; }
 
 echo "== settings (.env)"
@@ -29,6 +32,19 @@ case "$STAMPS" in
     ;;
 esac
 
+echo "== password protection"
+mkdir -p auth && chmod 755 auth
+if [ -n "$HTPASSWD" ]; then
+  printf '%s\n' "$HTPASSWD" > auth/htpasswd.tmp && chmod 644 auth/htpasswd.tmp && mv auth/htpasswd.tmp auth/htpasswd
+  echo "auth/htpasswd written (user ${HTPASSWD%%:*})"
+fi
+if [ "$(sed -n 's/^BASIC_AUTH=//p' .env)" = "false" ]; then
+  echo "BASIC_AUTH=false in .env – the site is public"
+elif [ ! -s auth/htpasswd ]; then
+  echo "auth/htpasswd missing – set the GitHub secret SITE_BASIC_AUTH (user:password)" >&2
+  exit 1
+fi
+
 echo "== routing data"
 if [ ! -f data/segments/E5_N50.rd5 ] || [ ! -f data/segments/E10_N50.rd5 ]; then
   sh ./download-segments.sh data/segments
@@ -36,7 +52,7 @@ fi
 if [ -f data/stamps.geojson ]; then echo "stamps.geojson present"; else echo "stamps.geojson missing"; fi
 
 echo "== images"
-docker login ghcr.io -u deploy --password-stdin >/dev/null
+printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u deploy --password-stdin >/dev/null
 trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
 compose pull --quiet
 docker logout ghcr.io >/dev/null

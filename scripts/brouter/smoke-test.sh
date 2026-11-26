@@ -1,12 +1,13 @@
 #!/bin/sh
 # Checks the routing of a running stack against the sample tours of milestone M2.
 # Usage: scripts/brouter/smoke-test.sh [base URL, default http://localhost]
+# SMOKE_AUTH="user:password" for a site behind the password protection (production).
 # Success: three "OK" lines and exit code 0.
 set -eu
 base=${1:-http://localhost}
 
 check() { # name expectation json-body
-  answer=$(curl -s -X POST -H "Content-Type: application/json" -d "$3" "$base/api/route" -w '\n%{http_code}')
+  answer=$(curl -s ${SMOKE_AUTH:+-u "$SMOKE_AUTH"} -X POST -H "Content-Type: application/json" -d "$3" "$base/api/route" -w '\n%{http_code}')
   python3 -I - "$1" "$2" "$answer" <<'PY'
 import json, sys
 name, expect, answer = sys.argv[1], sys.argv[2], sys.argv[3]

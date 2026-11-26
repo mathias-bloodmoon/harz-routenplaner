@@ -11,8 +11,11 @@ services:
       OPERATOR_NAME: ${OPERATOR_NAME:-Mathias Nagel}
       OPERATOR_ADDRESS: ${OPERATOR_ADDRESS:-}
       OPERATOR_EMAIL: ${OPERATOR_EMAIL:-}
+      # Password protection: on unless .env says BASIC_AUTH=false; auth/htpasswd is written by the deploy
+      BASIC_AUTH: ${BASIC_AUTH:-true}
     volumes:
       - ./data:/srv/data:ro
+      - ./auth:/srv/auth:ro
     networks:
       default: {}
       edge:

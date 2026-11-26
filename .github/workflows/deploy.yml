@@ -2,7 +2,7 @@ name: Build and deploy
 
 # main → multi-arch images (linux/amd64 + linux/arm64) on ghcr.io → deploy to nsc-demo over SSH → smoke test.
 # Secrets (Settings → Secrets → Actions): DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_USER, DEPLOY_KNOWN_HOSTS,
-# CADDY_CONTAINER. Repository variable STAMPS_ENABLED (true/false) switches the stamp layer. See infra/README.md.
+# CADDY_CONTAINER, SITE_BASIC_AUTH ("user:password" of the site's password protection). Repository variable STAMPS_ENABLED (true/false) switches the stamp layer. See infra/README.md.
 on:
   push:
     branches: [main]
@@ -97,11 +97,20 @@ jobs:
           pnpm --filter scripts stamps:fetch-special
           pnpm --filter scripts stamps:build
           scp data/stamps.geojson prod:/opt/harz-routenplaner/data/stamps.geojson
+      # Only the htpasswd hash (apr1) goes to the server, never the password itself.
       - name: Deploy
         run: |
-          printf '%s' "$GHCR_TOKEN" | ssh prod "sh /opt/harz-routenplaner/remote-deploy.sh '$TAG' '$CADDY' '$STAMPS'"
+          user=${SITE_BASIC_AUTH%%:*}
+          pass=${SITE_BASIC_AUTH#*:}
+          if [ -z "$user" ] || [ -z "$pass" ] || [ "$user" = "$SITE_BASIC_AUTH" ]; then
+            echo "::error::secret SITE_BASIC_AUTH (user:password) is missing"; exit 1
+          fi
+          hash=$(printf '%s\n' "$pass" | openssl passwd -apr1 -stdin)
+          printf '%s\n%s:%s\n' "$GHCR_TOKEN" "$user" "$hash" |
+            ssh prod "sh /opt/harz-routenplaner/remote-deploy.sh '$TAG' '$CADDY' '$STAMPS'"
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SITE_BASIC_AUTH: ${{ secrets.SITE_BASIC_AUTH }}
           TAG: ${{ github.sha }}
           CADDY: ${{ secrets.CADDY_CONTAINER }}
           STAMPS: ${{ vars.STAMPS_ENABLED }}
@@ -117,21 +126,28 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - name: HTTPS, pages and api
+      - name: Password protection, HTTPS, pages and api
         run: |
           base=https://routing.pixelcenter.de
-          for i in 1 2 3 4 5 6; do curl -sf "$base/" -o /dev/null && break; sleep 10; done
-          curl -sf "$base/" | grep -q "<title>Harz Routenplaner</title>"
-          curl -sf "$base/api/health" | grep -q '"status":"ok"'
-          for page in impressum datenschutz datenquellen; do curl -sf "$base/$page" | grep -q 'src/pages/legal\|assets/'; done
-          curl -sf "$base/config.json"; echo
+          for i in 1 2 3 4 5 6; do curl -sf -u "$SMOKE_AUTH" "$base/" -o /dev/null && break; sleep 10; done
+          for path in / /api/health /config.json /data/stamps.geojson /impressum; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$base$path")
+            echo "without password: $path → $code"; test "$code" = 401
+          done
+          curl -sf -u "$SMOKE_AUTH" "$base/" | grep -q "<title>Harz Routenplaner</title>"
+          curl -sf -u "$SMOKE_AUTH" "$base/api/health" | grep -q '"status":"ok"'
+          for page in impressum datenschutz datenquellen; do curl -sf -u "$SMOKE_AUTH" "$base/$page" | grep -q 'src/pages/legal\|assets/'; done
+          curl -sf -u "$SMOKE_AUTH" "$base/config.json"; echo
           scripts/brouter/smoke-test.sh "$base"
+        env:
+          SMOKE_AUTH: ${{ secrets.SITE_BASIC_AUTH }}
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps chromium
       - name: Production E2E (map loads, route calculated, GPX downloads)
         run: pnpm e2e --grep @production --project desktop --project phone
         env:
           E2E_BASE_URL: https://routing.pixelcenter.de
+          E2E_BASIC_AUTH: ${{ secrets.SITE_BASIC_AUTH }}
           PRODUCTION_SMOKE: "1"
       - uses: actions/upload-artifact@v7
         if: always()

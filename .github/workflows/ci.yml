@@ -87,6 +87,28 @@ jobs:
         env:
           STAMPS_ENABLED: "false"
           STAMPS_DATA_DIR: ../apps/web/e2e/fixtures
+      - name: Password protection (BASIC_AUTH=true needs auth/htpasswd, otherwise the container refuses to start)
+        run: |
+          image=ghcr.io/mathias-bloodmoon/harz-web:local
+          cid=$(docker run -d -e BASIC_AUTH=true "$image")
+          exit_code=$(timeout 30 docker wait "$cid") || { echo "started without htpasswd"; docker rm -f "$cid"; exit 1; }
+          docker logs "$cid" 2>&1 | grep "refusing to start"; docker rm "$cid"
+          test "$exit_code" != 0
+          auth="$RUNNER_TEMP/auth"
+          mkdir -p "$auth" && chmod 755 "$auth"
+          printf 'e2e:%s\n' "$(printf 'ci-secret\n' | openssl passwd -apr1 -stdin)" > "$auth/htpasswd"
+          chmod 644 "$auth/htpasswd"
+          docker run -d --name harz-web-auth -p 8081:8080 -e BASIC_AUTH=true -v "$auth:/srv/auth:ro" "$image"
+          for i in $(seq 1 20); do curl -sf http://localhost:8081/healthz && break; sleep 1; done
+          code() { curl -s -o /dev/null -w '%{http_code}' "$@"; }
+          test "$(code http://localhost:8081/)" = 401
+          test "$(code http://localhost:8081/config.json)" = 401
+          test "$(code http://localhost:8081/api/health)" = 401
+          test "$(code -u e2e:wrong http://localhost:8081/)" = 401
+          test "$(code -u e2e:ci-secret http://localhost:8081/)" = 200
+          curl -sf -u e2e:ci-secret http://localhost:8081/config.json | grep -q stampsEnabled
+          curl -sI -u e2e:ci-secret http://localhost:8081/ | grep -qi '^x-robots-tag: noindex'
+          docker rm -f harz-web-auth
       - uses: actions/upload-artifact@v7
         if: always()
         with:
